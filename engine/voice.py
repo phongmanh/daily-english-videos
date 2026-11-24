@@ -61,3 +61,64 @@ def short_track(W):
     tr.add("follow", say("Follow for a new word every day!"), 0.0)
     audio, dur = tr.render(1.5)
     return audio, dur, tr.marks
+
+NUM = ["one", "two", "three", "four", "five"]
+
+def quiz_track(questions):
+    """questions: list of {"answer": word dict, "options": [word dicts], "correct": index}."""
+    tr = Track(0.5)
+    tr.add("intro", say("Quiz time! How many can you get?"), 0.6)
+    for qi, q in enumerate(questions):
+        tr.add(f"q{qi}", say(f"Question {NUM[qi]}. Which word means: {q['answer']['mean_say']}"), 0.4)
+        for oi, o in enumerate(q["options"]):
+            tr.add(f"q{qi}_l{oi}", say("ABC"[oi] + "."), 0.12)
+            tr.add(f"q{qi}_o{oi}", say(o["ph"], ph=True), 0.35)
+        st = tr.t
+        tr.gap(3.0)
+        tr.marks[f"q{qi}_count"] = [[round(st, 3), round(tr.t, 3)]]
+        tr.add(f"q{qi}_ans", say("The answer is:"), 0.15)
+        tr.add(f"q{qi}_word", say(q["answer"]["ph"], ph=True), 1.0)
+    tr.add("outro", say("How many did you get? Comment your score!"), 0.0)
+    audio, dur = tr.render(1.6)
+    return audio, dur, tr.marks
+
+def long_tracks(words, intro="Here are this week's five words. Listen, and repeat after me."):
+    """Returns {scene name: (audio, dur, marks)} for title, w0..wN, review, outro."""
+    out = {}
+    tr = Track(0.6)
+    tr.add("intro", say("Relax, and learn English."), 0.75)
+    tr.add("sub", say(intro), 0.0)
+    out["title"] = (*tr.render(1.2), tr.marks)
+    for i, W in enumerate(words):
+        tr = Track(0.8)
+        tr.add("label", say(f"Word {i + 1}."), 0.35)
+        tr.add("word", say(W["ph"], ph=True), 0.9)
+        tr.add("listen", say("Listen."), 0.45)
+        for j, s in enumerate(W["syl"]):
+            tr.add(f"syl{j}", say(s, speed=SLOW, ph=True), 0.5)
+        tr.gap(0.2)
+        tr.add("word", say(W["ph"], speed=SLOW, ph=True), 0.6)
+        tr.add("word", say(W["ph"], ph=True), 0.9)
+        tr.add("note", say(W["note_say"]), 0.9)
+        tr.add("turn_say", say("Now you. Say it with me."), 0.4)
+        tr.add("word", say(W["ph"], ph=True), 0.3)
+        st = tr.t
+        tr.gap(2.6)
+        tr.marks["turn"] = [[round(st, 3), round(tr.t, 3)]]
+        tr.add("word", say(W["ph"], ph=True), 1.2)
+        art = "an" if W["pos"][0] in "aeiou" else "a"
+        tr.add("pos", say(f"It's {art} {W['pos']}."), 0.75)
+        tr.add("meaning", say("It means: " + W["mean_say"]), 0.75)
+        tr.add("example", say("For example: " + W["ex_say"]), 0.75)
+        tr.add("tip", say("Tip: " + W["tip_say"]), 0.0)
+        out[f"w{i}"] = (*tr.render(1.6), tr.marks)
+    tr = Track(0.5)
+    tr.add("head", say("Let's review. Repeat each word after me."), 1.0)
+    for i, W in enumerate(words):
+        tr.add(f"r{i}", say(W["ph"], ph=True), 1.8)
+    out["review"] = (*tr.render(0.4), tr.marks)
+    tr = Track(0.5)
+    tr.add("l1", say("Great job! Try using one of these words today."), 0.75)
+    tr.add("l2", say("See you next time."), 0.0)
+    out["outro"] = (*tr.render(2.0), tr.marks)
+    return out

@@ -51,15 +51,16 @@ If videos stay private: either publish them by hand in YouTube Studio, or fill i
 
 ## 3. Test
 
-GitHub → **Actions → Daily Short → Run workflow**
+GitHub → **Actions → Daily video → Run workflow**
 - Tick **dry run** first: it only makes the video. Download it from *Artifacts* and check it.
-- Then run without dry run. YouTube gets a private video scheduled for 18:00 (Vietnam); Facebook gets a scheduled Reel.
+- Then run without dry run. YouTube gets a private video scheduled for 18:00 (Vietnam); Facebook gets a scheduled Reel (or a video post for the weekly long video).
 
 ## Daily schedule
 
 - Runs every day at **02:37 Vietnam time** (GitHub may start it late — that's OK).
-- The video goes public at **18:00 Vietnam time** (change `PUBLISH_HOUR` in `.github/workflows/daily-short.yml`).
-- Posted words are recorded in `state/published.json`; the next word comes from `words/queue.json`.
+- The post goes public at **18:00 Vietnam time** (change `PUBLISH_HOUR` in `.github/workflows/daily-video.yml`).
+- Cycle: 5 word Shorts → 1 quiz Short → 1 long video → repeat. The long video takes ~10–15 min to make.
+- Posts are recorded in `state/published.json`; the next word comes from `words/queue.json`.
 
 ## If something breaks
 
