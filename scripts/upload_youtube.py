@@ -21,7 +21,8 @@ def main():
                         client_id=os.environ["YT_CLIENT_ID"], client_secret=os.environ["YT_CLIENT_SECRET"],
                         scopes=["https://www.googleapis.com/auth/youtube.upload"])
     yt = build("youtube", "v3", credentials=creds, cache_discovery=False)
-    status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False}
+    status = {"privacyStatus": "private", "selfDeclaredMadeForKids": False,
+              "containsSyntheticMedia": True}   # realistic AI narrator -> YouTube "altered or synthetic" disclosure
     if a.publish_at:
         status["publishAt"] = a.publish_at
     body = {"snippet": {"title": meta["title"], "description": meta["description"], "tags": meta["tags"],

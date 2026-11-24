@@ -34,19 +34,31 @@ def post_reel(meta, page, token, ts):
         data.update({"video_state": "SCHEDULED", "scheduled_publish_time": str(ts)})
     else:
         data["video_state"] = "PUBLISHED"
+    data["is_ai_generated"] = "true"   # Meta requires an AI label for reels with a realistic AI voiceover
     r = requests.post(f"{API}/{page}/video_reels", data=data, timeout=120)
+    if not r.ok and "is_ai_generated" in r.text:
+        print("::warning::Facebook did not accept is_ai_generated for this Reel - add the AI label in Meta Business Suite", file=sys.stderr)
+        data.pop("is_ai_generated")
+        r = requests.post(f"{API}/{page}/video_reels", data=data, timeout=120)
     if not r.ok:
         print(r.text, file=sys.stderr)
     r.raise_for_status()
     return video_id, data["video_state"]
 
 def post_video(meta, page, token, ts):
-    data = {"access_token": token, "title": meta.get("facebook_title", ""), "description": meta["facebook_description"]}
+    data = {"access_token": token, "title": meta.get("facebook_title", ""), "description": meta["facebook_description"],
+            "is_ai_generated": "true"}
     if ts:
         data.update({"published": "false", "scheduled_publish_time": str(ts)})
-    with open(meta["video"], "rb") as f:
-        r = requests.post(f"https://graph-video.facebook.com/{V}/{page}/videos", data=data,
-                          files={"source": ("video.mp4", f, "video/mp4")}, timeout=1800)
+    def send():
+        with open(meta["video"], "rb") as f:
+            return requests.post(f"https://graph-video.facebook.com/{V}/{page}/videos", data=data,
+                                 files={"source": ("video.mp4", f, "video/mp4")}, timeout=1800)
+    r = send()
+    if not r.ok and "is_ai_generated" in r.text:
+        print("::warning::Facebook did not accept is_ai_generated for this video - add the AI label in Meta Business Suite", file=sys.stderr)
+        data.pop("is_ai_generated")
+        r = send()
     if not r.ok:
         print(r.text, file=sys.stderr)
     r.raise_for_status()

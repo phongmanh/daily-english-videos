@@ -39,26 +39,45 @@ class Track:
             i = int(st * SR); buf[i:i + len(a)] += a
         return buf, dur
 
+# Several ways to say each fixed line, so Shorts don't repeat word for word (picked per word).
+LINES = {
+    "hook": ["Today's word:", "Here's a new word:", "Let's learn this word:", "Word of the day:", "Today, let's say:"],
+    "listen": ["Listen.", "Listen carefully.", "Let's break it down.", "Slowly now.", "Listen closely."],
+    "vn": ["A tip for Vietnamese speakers.", "Watch out for this.", "A common mistake.", "Be careful here."],
+    "turn": ["Your turn.", "Now you try.", "Say it with me.", "Now you.", "Try it out loud."],
+    "meaning": ["It means:", "This word means:", "Here's the meaning:", "In simple words:"],
+    "example": ["For example:", "Like this:", "You can say:", "Here's an example:"],
+    "follow": ["Follow for a new word every day!", "See you tomorrow with a new word!",
+               "Follow for one new word every day!", "Come back tomorrow for another word!"],
+}
+
+def pick(key, seed):
+    opts = LINES[key]
+    return opts[(seed + 7 * list(LINES).index(key)) % len(opts)]
+
 def short_track(W):
     """Narration for one Short. W is a word dict from words/<word>.json."""
+    seed = sum(map(ord, W["word"]))
     tr = Track(0.5)
-    tr.add("hook", say("Today's word:"), 0.25)
+    tr.add("hook", say(pick("hook", seed)), 0.25)
     tr.add("word", say(W["ph"], ph=True), 0.8)
-    tr.add("listen", say("Listen."), 0.4)
+    tr.add("listen", say(pick("listen", seed)), 0.4)
     for j, s in enumerate(W["syl"]):
         tr.add(f"syl{j}", say(s, speed=SLOW, ph=True), 0.45)
     tr.gap(0.15)
     tr.add("word", say(W["ph"], speed=SLOW, ph=True), 0.55)
     tr.add("word", say(W["ph"], ph=True), 0.8)
     tr.add("note", say(W["note_say"]), 0.8)
-    tr.add("turn_say", say("Your turn."), 0.3)
+    if W.get("vn_tip_say"):
+        tr.add("vntip", say(pick("vn", seed) + " " + W["vn_tip_say"]), 0.8)
+    tr.add("turn_say", say(pick("turn", seed)), 0.3)
     st = tr.t
     tr.gap(2.2)
     tr.marks["turn"] = [[round(st, 3), round(tr.t, 3)]]
     tr.add("word", say(W["ph"], ph=True), 0.9)
-    tr.add("meaning", say("It means: " + W["mean_say"]), 0.7)
-    tr.add("example", say("For example: " + W["ex_say"]), 0.8)
-    tr.add("follow", say("Follow for a new word every day!"), 0.0)
+    tr.add("meaning", say(pick("meaning", seed) + " " + W["mean_say"]), 0.7)
+    tr.add("example", say(pick("example", seed) + " " + W["ex_say"]), 0.8)
+    tr.add("follow", say(pick("follow", seed)), 0.0)
     audio, dur = tr.render(1.5)
     return audio, dur, tr.marks
 
