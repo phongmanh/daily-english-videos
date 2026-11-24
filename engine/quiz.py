@@ -91,8 +91,8 @@ def build_scene(questions, dur, mk):
     blocks = []
     starts = [first(f"q{i}") - 0.3 for i in range(len(questions))] + [first("outro") - 0.3]
     reveal = [first(f"q{i}_ans") - 0.05 for i in range(len(questions))]
-    intro = Block(simple("Quiz time!", gel(92, b"Bold"), INK, 900, 110), X0, 860, 0.2, starts[0] - 0.3)
-    sub = Block(simple("3 questions · 3 câu hỏi · Comment your score!", inter("Medium", 34), MUTE, 900), X0, 990, 0.6, starts[0] - 0.3)
+    intro = Block(simple("Quiz time!", gel(92, b"Bold"), INK, 900, 110), X0, 860, -1.0, starts[0] - 0.3)
+    sub = Block(simple("3 questions · 3 câu hỏi · Comment your score!", inter("Medium", 34), MUTE, 900), X0, 990, -1.0, starts[0] - 0.3)
     blocks += [intro, sub]
     for i, q in enumerate(questions):
         a = q["answer"]; acc = tuple(a["accent"])
@@ -151,7 +151,7 @@ def build_scene(questions, dur, mk):
                 reg = f[y0:y0 + hh, x0:x0 + ww]
                 aa = cd[..., 3:4] * vis
                 f[y0:y0 + hh, x0:x0 + ww] = reg * (1 - aa) + cd[..., :3] * 255 * aa
-        k = min(1.0, t / 0.3, max(0.0, (dur - t) / 0.6))
+        k = min(1.0, max(0.0, (dur - t) / 0.6))   # no fade-in: frame 0 = cover
         return f if k >= 1 else f * k + bgc * (1 - k)
     return draw
 
