@@ -1,0 +1,45 @@
+{
+ "word": "unwind",
+ "ipa": "/ʌnˈwaɪnd/",
+ "pos": "verb",
+ "vi": "thư giãn, xả hơi",
+ "meaning": "To relax after work or a stressful time.",
+ "example": "I like to unwind with soft music after a long day.",
+ "forms": [
+  "unwind"
+ ],
+ "ph": "ʌnwˈaɪnd",
+ "syl": [
+  "ʌn",
+  "wˈaɪnd"
+ ],
+ "chips": [
+  "un",
+  "wind"
+ ],
+ "stress": 1,
+ "like": [
+  [
+   "un-",
+   false
+  ],
+  [
+   "WYND",
+   true
+  ]
+ ],
+ "note_say": "The stress is on the second syllable. The second part rhymes with find.",
+ "mean_say": "to relax after work or a stressful time.",
+ "ex_say": "I like to unwind with soft music after a long day.",
+ "tip": "Past tense: unwound /ʌnˈwaʊnd/. Same idea: relax, chill out.",
+ "bg": [
+  250,
+  220,
+  190
+ ],
+ "accent": [
+  200,
+  96,
+  40
+ ]
+}

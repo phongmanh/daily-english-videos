@@ -1,0 +1,40 @@
+{
+ "word": "stroll",
+ "ipa": "/stroʊl/",
+ "pos": "verb",
+ "vi": "đi dạo, tản bộ",
+ "meaning": "To walk slowly and calmly, just for pleasure.",
+ "example": "We strolled along the beach after dinner.",
+ "forms": [
+  "strolled",
+  "stroll"
+ ],
+ "ph": "stɹˈoʊl",
+ "syl": [
+  "stɹˈoʊl"
+ ],
+ "chips": [
+  "stroll"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "STROHL",
+   true
+  ]
+ ],
+ "note_say": "It's just one syllable. It rhymes with roll.",
+ "mean_say": "to walk slowly and calmly, just for pleasure.",
+ "ex_say": "We strolled along the beach after dinner.",
+ "tip": "It's also a noun: \"take a stroll\" means go for a slow walk.",
+ "bg": [
+  214,
+  228,
+  202
+ ],
+ "accent": [
+  40,
+  120,
+  78
+ ]
+}

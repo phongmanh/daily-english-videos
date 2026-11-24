@@ -1,0 +1,40 @@
+{
+ "word": "doze",
+ "ipa": "/doʊz/",
+ "pos": "verb",
+ "vi": "ngủ gà ngủ gật, chợp mắt",
+ "meaning": "To sleep lightly for a short time.",
+ "example": "Grandpa dozed off in his chair after lunch.",
+ "forms": [
+  "dozed",
+  "doze"
+ ],
+ "ph": "dˈoʊz",
+ "syl": [
+  "dˈoʊz"
+ ],
+ "chips": [
+  "doze"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "DOHZ",
+   true
+  ]
+ ],
+ "note_say": "One syllable. It ends with a buzzing z, like in nose.",
+ "mean_say": "to sleep lightly for a short time.",
+ "ex_say": "Grandpa dozed off in his chair after lunch.",
+ "tip": "\"Doze off\" means to fall asleep without planning to.",
+ "bg": [
+  224,
+  216,
+  240
+ ],
+ "accent": [
+  98,
+  68,
+  160
+ ]
+}

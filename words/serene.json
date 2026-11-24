@@ -1,0 +1,45 @@
+{
+ "word": "serene",
+ "ipa": "/səˈriːn/",
+ "pos": "adjective",
+ "vi": "thanh bình, yên tĩnh",
+ "meaning": "Calm, peaceful, and free from worry.",
+ "example": "The lake looks serene in the early morning.",
+ "forms": [
+  "serene"
+ ],
+ "ph": "səɹˈiːn",
+ "syl": [
+  "sə",
+  "ɹˈiːn"
+ ],
+ "chips": [
+  "se",
+  "rene"
+ ],
+ "stress": 1,
+ "like": [
+  [
+   "suh-",
+   false
+  ],
+  [
+   "REEN",
+   true
+  ]
+ ],
+ "note_say": "The stress is on the second syllable. The end rhymes with green.",
+ "mean_say": "calm, peaceful, and free from worry.",
+ "ex_say": "The lake looks serene in the early morning.",
+ "tip": "Similar words: calm, peaceful. Noun: serenity.",
+ "bg": [
+  244,
+  222,
+  214
+ ],
+ "accent": [
+  176,
+  84,
+  96
+ ]
+}
