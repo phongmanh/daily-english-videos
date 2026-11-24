@@ -119,6 +119,8 @@ def main():
         video = os.path.join(a.out, "weekly.mp4")
         dur, chapters = render_long(words, video, seed=len(arg) + sum(map(ord, arg[0])))
         meta = meta_long(words, chapters)
+        from engine.thumbnail import make_long_thumbnail
+        meta["thumbnail"] = make_long_thumbnail(words, os.path.join(a.out, "weekly_thumbnail.png"))
     meta.update({"video": video, "duration": round(dur, 2)})
     with open(os.path.join(a.out, "meta.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=1)
