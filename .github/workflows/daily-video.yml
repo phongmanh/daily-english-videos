@@ -20,6 +20,11 @@ on:
       words:
         description: "For quiz/long: comma-separated words (empty = current batch)"
         required: false
+      platforms:
+        description: "Where to upload"
+        type: choice
+        options: [both, youtube, facebook]
+        default: both
       dry_run:
         description: "Only make the video, don't upload"
         type: boolean
@@ -94,7 +99,7 @@ jobs:
 
       - name: Upload to YouTube
         id: yt
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && inputs.platforms != 'facebook' }}
         env:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
@@ -105,7 +110,7 @@ jobs:
 
       - name: Upload to Facebook
         id: fb
-        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' }}
+        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' && inputs.platforms != 'youtube' }}
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
