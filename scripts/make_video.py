@@ -13,11 +13,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 BATCH = 5
-EMOJI = {"serene": "🌅", "cozy": "☕", "breeze": "🍃", "drowsy": "🌙", "unwind": "🌴",
-         "stroll": "🌳", "sip": "☕", "doze": "😴", "soothing": "🪷", "linger": "🌇"}
-TAGS = ["learn english", "english vocabulary", "english pronunciation", "học tiếng anh",
-        "từ vựng tiếng anh", "phát âm tiếng anh"]
-HASHTAGS = "#LearnEnglish #EnglishVocabulary #EnglishPronunciation #HocTiengAnh #TuVungTiengAnh"
+from scripts.captions import word_meta, quiz_meta, long_meta
 
 def load(p):
     with open(os.path.join(ROOT, p), encoding="utf-8") as f:
@@ -44,39 +40,14 @@ def plan():
     return ("long", batch[:BATCH]) if quiz_done else ("quiz", batch[:BATCH])
 
 def meta_word(wd):
-    w = wd["word"]; e = EMOJI.get(w, "✨")
-    return {"kind": "word", "word": w, "words": [w],
-            "title": f"{w} – how to pronounce it {e} #shorts #learnenglish"[:100],
-            "description": f"{w} {wd['ipa']} ({wd['pos']}) – {wd['vi']}\n\nMeaning: {wd['meaning']}\n"
-                           f"Example: {wd['example']}\n\nListen, repeat out loud, and comment your own sentence! 👇\n"
-                           f"Học từ vựng tiếng Anh mỗi ngày.\n\n{HASHTAGS} #shorts",
-            "tags": TAGS + [w, f"how to pronounce {w}"],
-            "facebook_description": f"{w} {wd['ipa']} – {wd['vi']} {e}\n{wd['meaning']}\n\"{wd['example']}\"\n\n"
-                                    f"Listen and repeat! Comment your own sentence 👇\n#LearnEnglish #HocTiengAnh #TuVungTiengAnh"}
+    return {"kind": "word", "word": wd["word"], "words": [wd["word"]], **word_meta(wd)}
 
 def meta_quiz(words, qs):
-    names = [w["word"] for w in words]
-    return {"kind": "quiz", "words": names,
-            "title": "English vocabulary quiz 🧠 Can you get 3/3? #shorts #learnenglish",
-            "description": f"Quick quiz on this week's words: {', '.join(names)}.\n"
-                           f"Comment your score! 👇\nKiểm tra từ vựng tuần này – bạn được mấy điểm?\n\n{HASHTAGS} #quiz #shorts",
-            "tags": TAGS + ["english quiz", "vocabulary quiz"] + names,
-            "facebook_description": f"Quiz time! 🧠 Can you get 3/3?\nThis week's words: {', '.join(names)}\n"
-                                    f"Comment your score 👇\n#LearnEnglish #HocTiengAnh #EnglishQuiz",
+    return {"kind": "quiz", "words": [w["word"] for w in words], **quiz_meta(words),
             "answers": [q["answer"]["word"] for q in qs]}
 
 def meta_long(words, chapters):
-    names = [w["word"] for w in words]
-    chap = "\n".join(f"{int(s // 60)}:{int(s % 60):02d} {label}" for s, label in chapters)
-    return {"kind": "long", "words": names,
-            "title": f"{len(words)} English Words This Week | {', '.join(names)}"[:100],
-            "description": f"Learn this week's {len(words)} English words — with pronunciation, meaning, and examples.\n"
-                           f"Học {len(words)} từ vựng tiếng Anh tuần này: phát âm, nghĩa và ví dụ.\n\n{chap}\n\n"
-                           f"Listen, repeat out loud, and comment your own sentence below 👇\n\n{HASHTAGS}",
-            "tags": TAGS + names,
-            "facebook_title": f"{len(words)} English words this week",
-            "facebook_description": f"This week's {len(words)} words 🌿 {', '.join(names)}\n"
-                                    f"Pronunciation, meaning and examples. Listen and repeat!\n\n{chap}\n\n#LearnEnglish #HocTiengAnh"}
+    return {"kind": "long", "words": [w["word"] for w in words], **long_meta(words, chapters)}
 
 def main():
     ap = argparse.ArgumentParser()
