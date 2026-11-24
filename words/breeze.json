@@ -1,0 +1,39 @@
+{
+ "word": "breeze",
+ "ipa": "/briːz/",
+ "pos": "noun",
+ "vi": "làn gió nhẹ",
+ "meaning": "A light, gentle wind.",
+ "example": "A cool breeze came in through the open window.",
+ "forms": [
+  "breeze"
+ ],
+ "ph": "bɹˈiːz",
+ "syl": [
+  "bɹˈiːz"
+ ],
+ "chips": [
+  "breeze"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "BREEZ",
+   true
+  ]
+ ],
+ "note_say": "It's just one syllable, with a long e sound, and a buzzing z at the end.",
+ "mean_say": "a light, gentle wind.",
+ "ex_say": "A cool breeze came in through the open window.",
+ "tip": "\"It's a breeze\" means something is very easy.",
+ "bg": [
+  210,
+  232,
+  244
+ ],
+ "accent": [
+  34,
+  104,
+  170
+ ]
+}

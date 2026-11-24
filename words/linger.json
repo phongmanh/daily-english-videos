@@ -1,0 +1,48 @@
+{
+ "word": "linger",
+ "ipa": "/ˈlɪŋɡər/",
+ "pos": "verb",
+ "vi": "nán lại, lưu lại",
+ "meaning": "To stay somewhere longer, because you don't want to leave.",
+ "example": "We lingered at the café until it closed.",
+ "forms": [
+  "lingered",
+  "linger"
+ ],
+ "ph": "lˈɪŋɡɚ",
+ "syl": [
+  "lˈɪŋ",
+  "ɡɚ"
+ ],
+ "chips": [
+  "lin",
+  "ger"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "LING",
+   true
+  ],
+  [
+   "-ger",
+   false
+  ]
+ ],
+ "note_say": "The stress is on the first syllable. The g is hard, like in finger.",
+ "mean_say": "to stay somewhere longer, because you don't want to leave.",
+ "ex_say": "We lingered at the café until it closed.",
+ "tip": "A smell or feeling can linger too: \"The smell of coffee lingered.\"",
+ "bg": [
+  247,
+  216,
+  198
+ ],
+ "accent": [
+  186,
+  78,
+  46
+ ],
+ "note": "Stress on the 1st syllable. Hard \"g\", like in \"finger\".",
+ "tip_say": "A smell or a feeling can linger too. The smell of coffee lingered in the room."
+}

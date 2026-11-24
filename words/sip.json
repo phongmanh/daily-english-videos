@@ -1,0 +1,42 @@
+{
+ "word": "sip",
+ "ipa": "/sɪp/",
+ "pos": "verb",
+ "vi": "nhấp, uống từng ngụm nhỏ",
+ "meaning": "To drink slowly, a little at a time.",
+ "example": "She sipped her coffee and watched the rain.",
+ "forms": [
+  "sipped",
+  "sip"
+ ],
+ "ph": "sˈɪp",
+ "syl": [
+  "sˈɪp"
+ ],
+ "chips": [
+  "sip"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "SIP",
+   true
+  ]
+ ],
+ "note_say": "One syllable, with a short i sound, like in sit. Not seep.",
+ "mean_say": "to drink slowly, a little at a time.",
+ "ex_say": "She sipped her coffee, and watched the rain.",
+ "tip": "It's also a noun: \"take a sip\". Short \"i\", not \"seep\".",
+ "bg": [
+  240,
+  224,
+  202
+ ],
+ "accent": [
+  150,
+  78,
+  38
+ ],
+ "note": "One syllable. A short \"i\" like in \"sit\", not \"seep\".",
+ "tip_say": "It's also a noun: take a sip."
+}

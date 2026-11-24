@@ -1,0 +1,136 @@
+name: Daily video
+
+# Every day it makes ONE post, following this cycle:
+#   5 x word Short  ->  quiz Short (those 5 words)  ->  long video (those 5 words)  ->  repeat
+on:
+  schedule:
+    # 19:37 UTC = 02:37 Vietnam time. Runs early (and off the hour) so GitHub delays don't matter:
+    # the video is scheduled to go public at PUBLISH_HOUR anyway.
+    - cron: "37 19 * * *"
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: "What to make (auto = next in the cycle)"
+        type: choice
+        options: [auto, word, quiz, long]
+        default: auto
+      word:
+        description: "For kind=word: which word (empty = next in queue)"
+        required: false
+      words:
+        description: "For quiz/long: comma-separated words (empty = current batch)"
+        required: false
+      dry_run:
+        description: "Only make the video, don't upload"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-video
+  cancel-in-progress: false
+
+env:
+  PUBLISH_HOUR: "18"          # Vietnam time (UTC+7) when the post goes public
+  KOKORO_DIR: ${{ github.workspace }}/models
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Cache voice model
+        id: model-cache
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: kokoro-v1.0-int8
+
+      - name: Download voice model (Kokoro, Apache-2.0)
+        if: steps.model-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p models
+          curl -sSL -o models/kokoro.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx
+          curl -sSL -o models/voices.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+
+      - name: Make the video
+        env:
+          IN_KIND: ${{ inputs.kind || 'auto' }}
+          IN_WORD: ${{ inputs.word }}
+          IN_WORDS: ${{ inputs.words }}
+        run: |
+          args=(--kind "$IN_KIND")
+          [ -n "$IN_WORD" ] && args+=(--word "$IN_WORD")
+          [ -n "$IN_WORDS" ] && args+=(--words "$IN_WORDS")
+          python scripts/make_video.py "${args[@]}"
+          echo "KIND=$(python -c "import json;print(json.load(open('out/meta.json'))['kind'])")" >> $GITHUB_ENV
+          echo "LABEL=$(python -c "import json;print('-'.join(json.load(open('out/meta.json'))['words']))")" >> $GITHUB_ENV
+          echo "PUBLISH_AT=$(python scripts/publish_time.py)" >> $GITHUB_ENV
+
+      - name: Keep a copy for 3 days (download from the run page)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.KIND }}-${{ env.LABEL }}
+          path: |
+            out/*.mp4
+            out/*.png
+            out/meta.json
+          retention-days: 3
+
+      - name: Upload to YouTube
+        id: yt
+        if: ${{ !inputs.dry_run }}
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          if [ -z "$YT_REFRESH_TOKEN" ]; then echo "::warning::YouTube secrets not set — skipping (see SETUP.md)"; exit 0; fi
+          python scripts/upload_youtube.py out/meta.json --publish-at "$PUBLISH_AT"
+
+      - name: Upload to Facebook
+        id: fb
+        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' }}
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: |
+          if [ -z "$FB_PAGE_TOKEN" ]; then echo "::warning::Facebook secrets not set — skipping (see SETUP.md)"; exit 0; fi
+          python scripts/upload_facebook.py out/meta.json --publish-at "$PUBLISH_AT"
+
+      - name: Record as posted
+        if: ${{ !cancelled() && !inputs.dry_run && (steps.yt.outputs.youtube_id != '' || steps.fb.outputs.facebook_id != '') }}
+        run: |
+          python scripts/mark_published.py out/meta.json --youtube "${{ steps.yt.outputs.youtube_id }}" \
+            --facebook "${{ steps.fb.outputs.facebook_id }}" --publish-at "$PUBLISH_AT"
+          git config user.name "daily-english-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/published.json
+          git commit -m "Posted $KIND: $LABEL (public $PUBLISH_AT)"
+          git pull --rebase --quiet && git push
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### ${KIND:-?}: ${LABEL:-?}"
+            echo "- Goes public: ${PUBLISH_AT:-?}"
+            [ -n "${{ steps.yt.outputs.youtube_id }}" ] && echo "- YouTube: https://youtu.be/${{ steps.yt.outputs.youtube_id }}"
+            [ -n "${{ steps.fb.outputs.facebook_id }}" ] && echo "- Facebook id: ${{ steps.fb.outputs.facebook_id }}"
+            echo "- Preview: see *Artifacts* below (kept 3 days)"
+          } >> $GITHUB_STEP_SUMMARY

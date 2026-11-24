@@ -1,0 +1,124 @@
+"""Narration with Kokoro (open-source TTS, Apache-2.0). Returns audio + timing marks."""
+import os
+import numpy as np
+
+MODEL_DIR = os.environ.get("KOKORO_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models"))
+VOICE = os.environ.get("KOKORO_VOICE", "af_heart")
+SPEED, SLOW = 0.88, 0.68
+SR = 24000
+_k = None
+
+def _model():
+    global _k
+    if _k is None:
+        from kokoro_onnx import Kokoro
+        _k = Kokoro(os.path.join(MODEL_DIR, "kokoro.onnx"), os.path.join(MODEL_DIR, "voices.bin"))
+    return _k
+
+def say(text, speed=SPEED, ph=False):
+    a, sr = _model().create(text, voice=VOICE, speed=speed, lang="en-us", is_phonemes=ph)
+    assert sr == SR
+    return a.astype(np.float32)
+
+class Track:
+    def __init__(self, lead):
+        self.t = lead; self.parts = []; self.marks = {}
+    def add(self, key, a, gap_after=0.0):
+        st = self.t
+        self.parts.append((st, a))
+        self.t += len(a) / SR
+        if key:
+            self.marks.setdefault(key, []).append([round(st, 3), round(self.t, 3)])
+        self.t += gap_after
+    def gap(self, s):
+        self.t += s
+    def render(self, tail):
+        dur = round(self.t + tail, 3)
+        buf = np.zeros(int(dur * SR) + 10, np.float32)
+        for st, a in self.parts:
+            i = int(st * SR); buf[i:i + len(a)] += a
+        return buf, dur
+
+def short_track(W):
+    """Narration for one Short. W is a word dict from words/<word>.json."""
+    tr = Track(0.5)
+    tr.add("hook", say("Today's word:"), 0.25)
+    tr.add("word", say(W["ph"], ph=True), 0.8)
+    tr.add("listen", say("Listen."), 0.4)
+    for j, s in enumerate(W["syl"]):
+        tr.add(f"syl{j}", say(s, speed=SLOW, ph=True), 0.45)
+    tr.gap(0.15)
+    tr.add("word", say(W["ph"], speed=SLOW, ph=True), 0.55)
+    tr.add("word", say(W["ph"], ph=True), 0.8)
+    tr.add("note", say(W["note_say"]), 0.8)
+    tr.add("turn_say", say("Your turn."), 0.3)
+    st = tr.t
+    tr.gap(2.2)
+    tr.marks["turn"] = [[round(st, 3), round(tr.t, 3)]]
+    tr.add("word", say(W["ph"], ph=True), 0.9)
+    tr.add("meaning", say("It means: " + W["mean_say"]), 0.7)
+    tr.add("example", say("For example: " + W["ex_say"]), 0.8)
+    tr.add("follow", say("Follow for a new word every day!"), 0.0)
+    audio, dur = tr.render(1.5)
+    return audio, dur, tr.marks
+
+NUM = ["one", "two", "three", "four", "five"]
+
+def quiz_track(questions):
+    """questions: list of {"answer": word dict, "options": [word dicts], "correct": index}."""
+    tr = Track(0.5)
+    tr.add("intro", say("Quiz time! How many can you get?"), 0.6)
+    for qi, q in enumerate(questions):
+        tr.add(f"q{qi}", say(f"Question {NUM[qi]}. Which word means: {q['answer']['mean_say']}"), 0.4)
+        for oi, o in enumerate(q["options"]):
+            tr.add(f"q{qi}_l{oi}", say("ABC"[oi] + "."), 0.12)
+            tr.add(f"q{qi}_o{oi}", say(o["ph"], ph=True), 0.35)
+        st = tr.t
+        tr.gap(3.0)
+        tr.marks[f"q{qi}_count"] = [[round(st, 3), round(tr.t, 3)]]
+        tr.add(f"q{qi}_ans", say("The answer is:"), 0.15)
+        tr.add(f"q{qi}_word", say(q["answer"]["ph"], ph=True), 1.0)
+    tr.add("outro", say("How many did you get? Comment your score!"), 0.0)
+    audio, dur = tr.render(1.6)
+    return audio, dur, tr.marks
+
+def long_tracks(words, intro="Here are this week's five words. Listen, and repeat after me."):
+    """Returns {scene name: (audio, dur, marks)} for title, w0..wN, review, outro."""
+    out = {}
+    tr = Track(0.6)
+    tr.add("intro", say("Relax, and learn English."), 0.75)
+    tr.add("sub", say(intro), 0.0)
+    out["title"] = (*tr.render(1.2), tr.marks)
+    for i, W in enumerate(words):
+        tr = Track(0.8)
+        tr.add("label", say(f"Word {i + 1}."), 0.35)
+        tr.add("word", say(W["ph"], ph=True), 0.9)
+        tr.add("listen", say("Listen."), 0.45)
+        for j, s in enumerate(W["syl"]):
+            tr.add(f"syl{j}", say(s, speed=SLOW, ph=True), 0.5)
+        tr.gap(0.2)
+        tr.add("word", say(W["ph"], speed=SLOW, ph=True), 0.6)
+        tr.add("word", say(W["ph"], ph=True), 0.9)
+        tr.add("note", say(W["note_say"]), 0.9)
+        tr.add("turn_say", say("Now you. Say it with me."), 0.4)
+        tr.add("word", say(W["ph"], ph=True), 0.3)
+        st = tr.t
+        tr.gap(2.6)
+        tr.marks["turn"] = [[round(st, 3), round(tr.t, 3)]]
+        tr.add("word", say(W["ph"], ph=True), 1.2)
+        art = "an" if W["pos"][0] in "aeiou" else "a"
+        tr.add("pos", say(f"It's {art} {W['pos']}."), 0.75)
+        tr.add("meaning", say("It means: " + W["mean_say"]), 0.75)
+        tr.add("example", say("For example: " + W["ex_say"]), 0.75)
+        tr.add("tip", say("Tip: " + W["tip_say"]), 0.0)
+        out[f"w{i}"] = (*tr.render(1.6), tr.marks)
+    tr = Track(0.5)
+    tr.add("head", say("Let's review. Repeat each word after me."), 1.0)
+    for i, W in enumerate(words):
+        tr.add(f"r{i}", say(W["ph"], ph=True), 1.8)
+    out["review"] = (*tr.render(0.4), tr.marks)
+    tr = Track(0.5)
+    tr.add("l1", say("Great job! Try using one of these words today."), 0.75)
+    tr.add("l2", say("See you next time."), 0.0)
+    out["outro"] = (*tr.render(2.0), tr.marks)
+    return out

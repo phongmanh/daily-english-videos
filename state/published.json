@@ -1,0 +1,60 @@
+{
+ "published": [
+  {
+   "word": "serene",
+   "youtube_id": "",
+   "facebook_id": "",
+   "publish_at": "",
+   "made_at": "",
+   "note": "posted manually before automation",
+   "kind": "word"
+  },
+  {
+   "word": "cozy",
+   "youtube_id": "",
+   "facebook_id": "",
+   "publish_at": "",
+   "made_at": "",
+   "note": "posted manually before automation",
+   "kind": "word"
+  },
+  {
+   "word": "breeze",
+   "youtube_id": "",
+   "facebook_id": "",
+   "publish_at": "",
+   "made_at": "",
+   "note": "posted manually before automation",
+   "kind": "word"
+  },
+  {
+   "word": "drowsy",
+   "youtube_id": "",
+   "facebook_id": "",
+   "publish_at": "",
+   "made_at": "",
+   "note": "posted manually before automation",
+   "kind": "word"
+  },
+  {
+   "word": "unwind",
+   "youtube_id": "",
+   "facebook_id": "",
+   "publish_at": "",
+   "made_at": "",
+   "note": "posted manually before automation",
+   "kind": "word"
+  },
+  {
+   "kind": "batch_closed",
+   "words": [
+    "serene",
+    "cozy",
+    "breeze",
+    "drowsy",
+    "unwind"
+   ],
+   "note": "first batch posted manually; no quiz/long needed"
+  }
+ ]
+}

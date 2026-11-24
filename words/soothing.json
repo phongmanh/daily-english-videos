@@ -1,0 +1,47 @@
+{
+ "word": "soothing",
+ "ipa": "/ˈsuːðɪŋ/",
+ "pos": "adjective",
+ "vi": "êm dịu, làm dịu",
+ "meaning": "Making you feel calm and relaxed.",
+ "example": "The sound of rain on the pond is so soothing.",
+ "forms": [
+  "soothing"
+ ],
+ "ph": "sˈuːðɪŋ",
+ "syl": [
+  "sˈuː",
+  "ðɪŋ"
+ ],
+ "chips": [
+  "soo",
+  "thing"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "SOO",
+   true
+  ],
+  [
+   "-thing",
+   false
+  ]
+ ],
+ "note_say": "The stress is on the first syllable. The t h is soft and buzzy, like in the word the.",
+ "mean_say": "making you feel calm and relaxed.",
+ "ex_say": "The sound of rain on the pond is so soothing.",
+ "tip": "Verb: soothe. Music, tea, or a gentle voice can be soothing.",
+ "bg": [
+  206,
+  228,
+  238
+ ],
+ "accent": [
+  24,
+  108,
+  140
+ ],
+ "note": "Stress on the 1st syllable. Soft, buzzy \"th\", like in \"the\".",
+ "tip_say": "The verb is soothe. Music, tea, or a gentle voice can be soothing."
+}

@@ -1,0 +1,45 @@
+{
+ "word": "cozy",
+ "ipa": "/ˈkoʊzi/",
+ "pos": "adjective",
+ "vi": "ấm cúng, dễ chịu",
+ "meaning": "Warm, comfortable, and safe, often in a small space.",
+ "example": "We spent a cozy evening at home while it rained outside.",
+ "forms": [
+  "cozy"
+ ],
+ "ph": "kˈoʊzi",
+ "syl": [
+  "kˈoʊ",
+  "zi"
+ ],
+ "chips": [
+  "co",
+  "zy"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "KOH",
+   true
+  ],
+  [
+   "-zee",
+   false
+  ]
+ ],
+ "note_say": "The stress is on the first syllable. The z is a buzzing z sound, not an s.",
+ "mean_say": "warm, comfortable, and safe, often in a small space.",
+ "ex_say": "We spent a cozy evening at home while it rained outside.",
+ "tip": "British spelling: cosy. Used for rooms, cafés, sweaters.",
+ "bg": [
+  246,
+  230,
+  200
+ ],
+ "accent": [
+  168,
+  98,
+  18
+ ]
+}

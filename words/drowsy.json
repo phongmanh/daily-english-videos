@@ -1,0 +1,45 @@
+{
+ "word": "drowsy",
+ "ipa": "/ˈdraʊzi/",
+ "pos": "adjective",
+ "vi": "buồn ngủ, lơ mơ",
+ "meaning": "Tired and almost falling asleep.",
+ "example": "The warm tea made me feel drowsy.",
+ "forms": [
+  "drowsy"
+ ],
+ "ph": "dɹˈaʊzi",
+ "syl": [
+  "dɹˈaʊ",
+  "zi"
+ ],
+ "chips": [
+  "drow",
+  "sy"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "DROW",
+   true
+  ],
+  [
+   "-zee",
+   false
+  ]
+ ],
+ "note_say": "The stress is on the first syllable. The first part rhymes with how.",
+ "mean_say": "tired and almost falling asleep.",
+ "ex_say": "The warm tea made me feel drowsy.",
+ "tip": "On medicine labels: \"may cause drowsiness\" (may make you sleepy).",
+ "bg": [
+  218,
+  220,
+  240
+ ],
+ "accent": [
+  70,
+  80,
+  170
+ ]
+}

@@ -1,0 +1,7 @@
+numpy
+pillow
+soundfile
+kokoro-onnx
+google-api-python-client
+google-auth
+requests
