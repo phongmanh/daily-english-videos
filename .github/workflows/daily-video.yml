@@ -23,8 +23,8 @@ on:
       platforms:
         description: "Where to upload"
         type: choice
-        options: [both, youtube, facebook]
-        default: both
+        options: [all, youtube, facebook, instagram]
+        default: all
       dry_run:
         description: "Only make the video, don't upload"
         type: boolean
@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload to YouTube
         id: yt
-        if: ${{ !inputs.dry_run && inputs.platforms != 'facebook' }}
+        if: ${{ !inputs.dry_run && (inputs.platforms == '' || inputs.platforms == 'all' || inputs.platforms == 'youtube') }}
         env:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
@@ -110,7 +110,7 @@ jobs:
 
       - name: Upload to Facebook
         id: fb
-        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' && inputs.platforms != 'youtube' }}
+        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' && (inputs.platforms == '' || inputs.platforms == 'all' || inputs.platforms == 'facebook') }}
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
@@ -118,14 +118,25 @@ jobs:
           if [ -z "$FB_PAGE_TOKEN" ]; then echo "::warning::Facebook secrets not set — skipping (see SETUP.md)"; exit 0; fi
           python scripts/upload_facebook.py out/meta.json --publish-at "$PUBLISH_AT"
 
+      - name: Upload to Instagram (published by the 17:47 run)
+        id: ig
+        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' && (inputs.platforms == '' || inputs.platforms == 'all' || inputs.platforms == 'instagram') }}
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: |
+          if [ -z "$FB_PAGE_TOKEN" ]; then echo "::warning::Facebook/Instagram secrets not set — skipping (see SETUP.md)"; exit 0; fi
+          python scripts/instagram.py prepare out/meta.json --publish-at "$PUBLISH_AT"
+
       - name: Record as posted
-        if: ${{ !cancelled() && !inputs.dry_run && (steps.yt.outputs.youtube_id != '' || steps.fb.outputs.facebook_id != '') }}
+        if: ${{ !cancelled() && !inputs.dry_run && (steps.yt.outputs.youtube_id != '' || steps.fb.outputs.facebook_id != '' || steps.ig.outputs.instagram_id != '' || steps.ig.outputs.instagram_pending != '') }}
         run: |
           python scripts/mark_published.py out/meta.json --youtube "${{ steps.yt.outputs.youtube_id }}" \
-            --facebook "${{ steps.fb.outputs.facebook_id }}" --publish-at "$PUBLISH_AT"
+            --facebook "${{ steps.fb.outputs.facebook_id }}" --instagram "${{ steps.ig.outputs.instagram_id }}" --publish-at "$PUBLISH_AT"
           git config user.name "daily-english-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add state/published.json
+          [ -f state/pending_instagram.json ] && git add state/pending_instagram.json
           git commit -m "Posted $KIND: $LABEL (public $PUBLISH_AT)"
           git pull --rebase --quiet && git push
 
@@ -137,5 +148,7 @@ jobs:
             echo "- Goes public: ${PUBLISH_AT:-?}"
             [ -n "${{ steps.yt.outputs.youtube_id }}" ] && echo "- YouTube: https://youtu.be/${{ steps.yt.outputs.youtube_id }}"
             [ -n "${{ steps.fb.outputs.facebook_id }}" ] && echo "- Facebook id: ${{ steps.fb.outputs.facebook_id }}"
+            [ -n "${{ steps.ig.outputs.instagram_pending }}" ] && echo "- Instagram: uploaded, publishes in the 17:47 run"
+            [ -n "${{ steps.ig.outputs.instagram_id }}" ] && echo "- Instagram: published (${{ steps.ig.outputs.instagram_id }})"
             echo "- Preview: see *Artifacts* below (kept 3 days)"
           } >> $GITHUB_STEP_SUMMARY
