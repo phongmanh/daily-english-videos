@@ -84,11 +84,11 @@ def build_scene(wd, dur, mk):
     blocks = []
     y = PY + PS + 56
     wf = gel(124, b"Bold")
-    blocks.append(Block(simple(wd["word"], wf, INK, 1000, 150), X0 - 4, y, first("word") - 0.3,
+    blocks.append(Block(simple(wd["word"], wf, INK, 1000, 150), X0 - 4, y, -1.0,   # visible from frame 0 (thumbnail)
                         alt=simple(wd["word"], wf, accent, 1000, 150), hi=hi)); y += 160
     ipa = simple(wd["ipa"], dejavu(40), MUTE)
     row = hstack([ipa.crop(ipa.getbbox()), pill(wd["pos"], inter("SemiBold", 26), PAPER, accent)], 26)
-    blocks.append(Block(row, X0, y, first("word") + 0.5)); y += row.height + 30
+    blocks.append(Block(row, X0, y, -1.0)); y += row.height + 30
     top = y
     cd, chips = _card(wd, accent)
     blocks.append(Block(cd, X0, y, p1_in, p1_out))
@@ -146,7 +146,8 @@ def build_scene(wd, dur, mk):
             reg = f[y0:y0 + hh, x0:x0 + ww]
             aa = a[..., 3:4] * vis
             f[y0:y0 + hh, x0:x0 + ww] = reg * (1 - aa) + a[..., :3] * 255 * aa
-        k = min(1.0, t / 0.3, max(0.0, (dur - t) / 0.6))
+        # no fade-in: frame 0 is what YouTube/Facebook use as the cover
+        k = min(1.0, max(0.0, (dur - t) / 0.6))
         if k < 1:
             f = f * k + bgc * (1 - k)
         return f
