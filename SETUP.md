@@ -49,6 +49,17 @@ If videos stay private: either publish them by hand in YouTube Studio, or fill i
    - A page token made from a long-lived user token does not expire (until you change your password or remove the app).
 4. Add `FB_PAGE_ID` and `FB_PAGE_TOKEN` as secrets.
 
+## 2b. Instagram (optional)
+
+Uses the same `FB_PAGE_ID` / `FB_PAGE_TOKEN` — no new secrets.
+
+1. Your Instagram must be a **Professional** account (Business or Creator) **linked to the Facebook Page**.
+2. Meta app → **Use cases → Add** → **Manage messaging & content on Instagram** → *API setup with Facebook login*.
+3. Generate the Page token again with `instagram_basic` and `instagram_content_publish` added (choose the Page **and** the Instagram account in the pop-up), and update `FB_PAGE_TOKEN`.
+
+Instagram's API can't schedule posts, so the 02:37 run uploads the Reel and **Publish Instagram**
+(17:47 Vietnam time) publishes it. Instagram's "AI info" label is added (set `IG_AI_LABEL: "false"` in the workflow env to turn it off).
+
 ## 3. Test
 
 GitHub → **Actions → Daily video → Run workflow**

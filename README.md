@@ -2,11 +2,11 @@
 
 Makes one post every day for YouTube and Facebook, in a repeating 7-day cycle:
 
-| Day | Post | YouTube | Facebook |
-|---|---|---|---|
-| 1–5 | **Word Short** (one new word) | Short | Reel |
-| 6 | **Quiz Short** (3 questions on those 5 words) | Short | Reel |
-| 7 | **Long video** (all 5 words, with chapters) | Video | Video post |
+| Day | Post | YouTube | Facebook | Instagram |
+|---|---|---|---|---|
+| 1–5 | **Word Short** (one new word) | Short | Reel | Reel |
+| 6 | **Quiz Short** (3 questions on those 5 words) | Short | Reel | Reel |
+| 7 | **Long video** (all 5 words, with chapters) | Video | Video post | Reel |
 
 Each Short (~30–35 s, 1080×1920): today's word → syllables with stress → "sounds like" → pronunciation tip →
 "your turn" pause → Vietnamese meaning → definition → example → follow reminder.
@@ -23,7 +23,10 @@ GitHub Actions (daily, 02:37 VN)  .github/workflows/daily-video.yml
   └─ scripts/make_video.py      decides word / quiz / long from state/published.json → out/*.mp4 + meta.json
   └─ scripts/upload_youtube.py  private, publishAt 18:00 VN
   └─ scripts/upload_facebook.py Reel (Shorts) or video post (long), scheduled 18:00 VN
+  └─ scripts/instagram.py prepare  uploads the Reel, saves it in state/pending_instagram.json
   └─ scripts/mark_published.py  records the post in state/published.json (commit)
+GitHub Actions (daily, 17:47 VN)  .github/workflows/publish-instagram.yml
+  └─ scripts/instagram.py publish  publishes the waiting Instagram Reel
 ```
 
 ## Folders

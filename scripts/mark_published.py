@@ -11,6 +11,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("meta")
 ap.add_argument("--youtube", default="")
 ap.add_argument("--facebook", default="")
+ap.add_argument("--instagram", default="")
 ap.add_argument("--publish-at", default="")
 a = ap.parse_args()
 meta = json.load(open(a.meta, encoding="utf-8"))
@@ -28,9 +29,12 @@ if existing:
         existing["youtube_id"] = a.youtube
     if a.facebook:
         existing["facebook_id"] = a.facebook
+    if a.instagram:
+        existing["instagram_id"] = a.instagram
     print("Updated", meta["kind"], meta["words"])
 else:
-    entry = {"kind": meta["kind"], "youtube_id": a.youtube, "facebook_id": a.facebook, "publish_at": a.publish_at,
+    entry = {"kind": meta["kind"], "youtube_id": a.youtube, "facebook_id": a.facebook, "instagram_id": a.instagram,
+             "publish_at": a.publish_at,
              "made_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     if meta["kind"] == "word":
         entry["word"] = meta["word"]
