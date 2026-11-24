@@ -38,6 +38,15 @@ def main():
                 tries += 1; time.sleep(2 ** tries); continue
             raise
     vid = resp["id"]
+    thumb = meta.get("thumbnail")
+    if thumb and os.path.exists(thumb):
+        try:
+            yt.thumbnails().set(videoId=vid, media_body=MediaFileUpload(thumb, mimetype="image/png")).execute()
+            print("YouTube thumbnail set")
+        except HttpError as e:
+            # Most common reason: the channel is not phone-verified (needed for custom thumbnails).
+            print(f"::warning::Could not set the custom thumbnail ({e.resp.status}): {e}. "
+                  "Verify the channel at youtube.com/verify, or upload out/weekly_thumbnail.png by hand.")
     print(f"YouTube upload OK: https://youtu.be/{vid} (status: {resp['status'].get('privacyStatus')}, "
           f"publishAt: {resp['status'].get('publishAt')})")
     out = os.environ.get("GITHUB_OUTPUT")
