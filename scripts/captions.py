@@ -8,7 +8,7 @@ YouTube gets title + body (+ #shorts for Shorts). Facebook/Instagram get the bod
 
 BRAND = "Daily English"
 CTA = "🔁 Listen, repeat out loud, and write your own sentence in the comments!"
-SCHEDULE = "📅 New word every day at 6 PM · Một từ mới mỗi ngày lúc 18:00"
+SCHEDULE = "📅 New word every day at 6 PM, review at 12 PM · Từ mới lúc 18:00, ôn tập lúc 12:00"
 HASHTAGS = "#DailyEnglish #LearnEnglish #EnglishVocabulary #EnglishPronunciation #HocTiengAnh #TuVungTiengAnh"
 TAGS = ["daily english", "learn english", "english vocabulary", "english pronunciation",
         "học tiếng anh", "từ vựng tiếng anh", "phát âm tiếng anh"]
@@ -61,3 +61,23 @@ def long_meta(words, chapters):
             "facebook_title": f"{n} English Words – {BRAND} Weekly",
             "facebook_description": _body(lines, shorts=False),
             "tags": TAGS + names}
+
+def review_meta(style, words):
+    """style: 'recall' (do you remember?) or 'quiz' (A/B/C). Posted at 12:00."""
+    names = [w["word"] for w in words]
+    if style == "recall":
+        lines = ["🧠 Daily Review: Do you still remember these words?",
+                 "🇻🇳 Ôn tập: bạn còn nhớ nghĩa của những từ này không?", ""] + \
+                [f"• {w['word']} {w['ipa']}" for w in words] + \
+                ["", "💬 Comment how many you remembered: 0, 1, 2 or 3!"]
+        title = f"Do You Remember? {', '.join(names)} – Daily Review | {BRAND} #shorts"
+    else:
+        lines = ["🧠 Quick Quiz: Can you get 3/3?",
+                 "🇻🇳 Ôn tập từ vựng – bạn được mấy điểm?",
+                 f"📝 Words: {' · '.join(sorted(names))}",
+                 "💬 Comment your score: 0, 1, 2 or 3!"]
+        title = f"Quick English Quiz – Can You Get 3/3? | {BRAND} #shorts"
+    return {"title": _fit(title),
+            "description": _body(lines, shorts=True),
+            "facebook_description": _body(lines, shorts=False),
+            "tags": TAGS + ["english review", "english quiz", "vocabulary quiz"] + names}

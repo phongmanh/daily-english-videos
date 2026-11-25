@@ -101,6 +101,25 @@ def quiz_track(questions):
     audio, dur = tr.render(1.6)
     return audio, dur, tr.marks
 
+def recall_track(words):
+    """Review Short: show a word we already learned, the viewer recalls the meaning, then reveal."""
+    tr = Track(0.5)
+    tr.add("intro", say("Review time! Do you still remember these words?"), 0.6)
+    for i, W in enumerate(words):
+        tr.add(f"w{i}", say(f"Word {NUM[i]}."), 0.3)
+        tr.add(f"w{i}_word", say(W["ph"], ph=True), 0.5)
+        tr.add(f"w{i}_ask", say("What does it mean?"), 0.2)
+        st = tr.t
+        tr.gap(3.0)
+        tr.marks[f"w{i}_count"] = [[round(st, 3), round(tr.t, 3)]]
+        tr.add(f"w{i}_mean", say("It means: " + W["mean_say"]), 0.5)
+        tr.add(f"w{i}_ex", say(W["ex_say"]), 0.5)
+        tr.add(f"w{i}_rep", say("Say it again:"), 0.2)
+        tr.add(f"w{i}_rep2", say(W["ph"], ph=True), 1.1)
+    tr.add("outro", say("How many did you remember? Tell me in the comments!"), 0.0)
+    audio, dur = tr.render(1.6)
+    return audio, dur, tr.marks
+
 def long_tracks(words, intro="Here are this week's five words. Listen, and repeat after me."):
     """Returns {scene name: (audio, dur, marks)} for title, w0..wN, review, outro."""
     out = {}

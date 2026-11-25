@@ -1,20 +1,24 @@
 name: Daily video
 
-# Every day it makes ONE post, following this cycle:
-#   5 x word Short  ->  quiz Short (those 5 words)  ->  long video (those 5 words)  ->  repeat
+# Two posts a day:
+#   18:00  the cycle: 5 x word Short  ->  long video (those 5 words)  ->  repeat
+#   12:00  review Short: 3 words already posted ("Do you remember?" or an A/B/C quiz, alternating)
+# Runs at night (off the hour, so GitHub delays don't matter); the videos are scheduled to go public later.
+# Each slot has backups in case GitHub drops a scheduled run; only one run per slot posts each day.
 on:
   schedule:
-    # 19:37 UTC = 02:37 Vietnam time. Runs early (and off the hour) so GitHub delays don't matter:
-    # the video is scheduled to go public at PUBLISH_HOUR anyway.
-    - cron: "37 19 * * *"   # 02:37 VN (main)
-    - cron: "13 22 * * *"   # 05:13 VN (backup if GitHub dropped the first one)
-    - cron: "41 0 * * *"    # 07:41 VN (second backup)
+    - cron: "37 19 * * *"   # 02:37 VN  18:00 post (main)
+    - cron: "13 22 * * *"   # 05:13 VN  18:00 post (backup)
+    - cron: "41 0 * * *"    # 07:41 VN  18:00 post (second backup)
+    - cron: "7 20 * * *"    # 03:07 VN  12:00 review (main)
+    - cron: "29 23 * * *"   # 06:29 VN  12:00 review (backup)
+    - cron: "53 1 * * *"    # 08:53 VN  12:00 review (second backup)
   workflow_dispatch:
     inputs:
       kind:
         description: "What to make (auto = next in the cycle)"
         type: choice
-        options: [auto, word, quiz, long]
+        options: [auto, word, review, long, quiz]
         default: auto
       word:
         description: "For kind=word: which word (empty = next in queue)"
@@ -40,7 +44,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  PUBLISH_HOUR: "18"          # Vietnam time (UTC+7) when the post goes public
   KOKORO_DIR: ${{ github.workspace }}/models
 
 jobs:
@@ -48,18 +51,33 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.c.outputs.run }}
+      slot: ${{ steps.c.outputs.slot }}
+      hour: ${{ steps.c.outputs.hour }}
     steps:
       - uses: actions/checkout@v4
       - id: c
         env:
           EVENT: ${{ github.event_name }}
-        run: python3 scripts/should_run.py
+          CRON: ${{ github.event.schedule }}
+          IN_KIND: ${{ inputs.kind }}
+        run: |
+          case "$CRON" in
+            "7 20 * * *"|"29 23 * * *"|"53 1 * * *") SLOT=review ;;
+            *) SLOT=word ;;
+          esac
+          [ "$IN_KIND" = "review" ] && SLOT=review
+          echo "slot=$SLOT" >> "$GITHUB_OUTPUT"
+          # Vietnam time (UTC+7) when the post goes public
+          if [ "$SLOT" = "review" ]; then echo "hour=12"; else echo "hour=18"; fi >> "$GITHUB_OUTPUT"
+          SLOT=$SLOT python3 scripts/should_run.py
 
   post:
     needs: check
     if: ${{ needs.check.outputs.run == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    env:
+      PUBLISH_HOUR: ${{ needs.check.outputs.hour }}
     steps:
       - uses: actions/checkout@v4
 
@@ -90,7 +108,7 @@ jobs:
 
       - name: Make the video
         env:
-          IN_KIND: ${{ inputs.kind || 'auto' }}
+          IN_KIND: ${{ needs.check.outputs.slot == 'review' && 'review' || inputs.kind || 'auto' }}
           IN_WORD: ${{ inputs.word }}
           IN_WORDS: ${{ inputs.words }}
         run: |
@@ -133,7 +151,7 @@ jobs:
           if [ -z "$FB_PAGE_TOKEN" ]; then echo "::warning::Facebook secrets not set — skipping (see SETUP.md)"; exit 0; fi
           python scripts/upload_facebook.py out/meta.json --publish-at "$PUBLISH_AT"
 
-      - name: Upload to Instagram (published by the 17:47 run)
+      - name: Upload to Instagram (published by the 11:47 / 17:47 run)
         id: ig
         if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' && (inputs.platforms == '' || inputs.platforms == 'all' || inputs.platforms == 'instagram') }}
         env:
@@ -163,7 +181,7 @@ jobs:
             echo "- Goes public: ${PUBLISH_AT:-?}"
             [ -n "${{ steps.yt.outputs.youtube_id }}" ] && echo "- YouTube: https://youtu.be/${{ steps.yt.outputs.youtube_id }}"
             [ -n "${{ steps.fb.outputs.facebook_id }}" ] && echo "- Facebook id: ${{ steps.fb.outputs.facebook_id }}"
-            [ -n "${{ steps.ig.outputs.instagram_pending }}" ] && echo "- Instagram: uploaded, publishes in the 17:47 run"
+            [ -n "${{ steps.ig.outputs.instagram_pending }}" ] && echo "- Instagram: uploaded, publishes in the next Publish Instagram run (11:47 / 17:47)"
             [ -n "${{ steps.ig.outputs.instagram_id }}" ] && echo "- Instagram: published (${{ steps.ig.outputs.instagram_id }})"
             echo "- Preview: see *Artifacts* below (kept 3 days)"
           } >> $GITHUB_STEP_SUMMARY

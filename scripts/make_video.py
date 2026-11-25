@@ -1,19 +1,24 @@
 """Decide what today's post is, render it, and write out/meta.json.
 
-Cycle (repeats): 5 x word Short  ->  quiz Short (those 5 words)  ->  long video (those 5 words)
+18:00 cycle (repeats): 5 x word Short  ->  long video (those 5 words)
+12:00 review (every day, --kind review): 3 words already posted, alternating
+      "Do you remember?" (recall) and an A/B/C quiz.
 
 Usage:
   python scripts/make_video.py                 # automatic: next item in the cycle
   python scripts/make_video.py --kind word --word cozy
   python scripts/make_video.py --kind quiz --words stroll,sip,doze,soothing,linger
   python scripts/make_video.py --kind long --words stroll,sip,doze,soothing,linger
+  python scripts/make_video.py --kind review                 # today's 12:00 review
 """
-import argparse, json, os, sys
+import argparse, json, os, random, sys
+from datetime import datetime, timedelta, timezone
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 BATCH = 5
-from scripts.captions import word_meta, quiz_meta, long_meta
+from scripts.captions import word_meta, quiz_meta, long_meta, review_meta
+VN = timezone(timedelta(hours=7))
 
 def load(p):
     with open(os.path.join(ROOT, p), encoding="utf-8") as f:
@@ -23,21 +28,43 @@ def word(w):
     return load(f"words/{w}.json")
 
 def plan():
-    """Return ("word", "<w>") | ("quiz", [words]) | ("long", [words]) | (None, reason)."""
+    """Return ("word", "<w>") | ("long", [words]) | (None, reason). (The quiz now lives in the 12:00 review.)"""
     pub = load("state/published.json")["published"]
     last = max([i for i, e in enumerate(pub) if e.get("kind") in ("long", "batch_closed")] or [-1])
     since = pub[last + 1:]
     batch = [e["word"] for e in since if e.get("kind", "word") == "word"]
-    quiz_done = any(e.get("kind") == "quiz" for e in since)
     posted = {e["word"] for e in pub if e.get("kind", "word") == "word" and "word" in e}
     queue = [w for w in load("words/queue.json")["queue"] if w not in posted]
     if len(batch) < BATCH:
         if queue:
             return "word", queue[0]
         if len(batch) >= 3:          # queue ran dry: still finish the cycle with what we have
-            return ("long", batch) if quiz_done else ("quiz", batch)
+            return "long", batch
         return None, "Queue is empty: add words to words/queue.json"
-    return ("long", batch[:BATCH]) if quiz_done else ("quiz", batch[:BATCH])
+    return "long", batch[:BATCH]
+
+def plan_review(day=None):
+    """Pick 3 words that are already public, mostly recent ones. Even days: recall, odd days: quiz."""
+    day = day or datetime.now(VN).date()
+    now = datetime.now(VN)
+    pub = load("state/published.json")["published"]
+    seen = []
+    for e in pub:
+        if e.get("kind", "word") != "word" or "word" not in e:
+            continue
+        at = e.get("publish_at")
+        if at and datetime.fromisoformat(at) > now:      # not public yet (e.g. today's 18:00 word)
+            continue
+        if e["word"] not in seen:
+            seen.append(e["word"])
+    if len(seen) < 3:
+        return None, "Need at least 3 posted words for a review"
+    pool = seen[-10:]
+    rng = random.Random(day.toordinal())
+    style = "recall" if day.toordinal() % 2 == 0 else "quiz"
+    if style == "quiz":
+        return style, rng.sample(pool, min(5, len(pool)))
+    return style, rng.sample(pool, 3)
 
 def meta_word(wd):
     return {"kind": "word", "word": wd["word"], "words": [wd["word"]], **word_meta(wd)}
@@ -51,7 +78,8 @@ def meta_long(words, chapters):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--kind", choices=["auto", "word", "quiz", "long"], default="auto")
+    ap.add_argument("--kind", choices=["auto", "word", "quiz", "long", "review"], default="auto")
+    ap.add_argument("--style", choices=["recall", "quiz"], help="for --kind review (default: by date)")
     ap.add_argument("--word")
     ap.add_argument("--words", help="comma-separated, for quiz/long")
     ap.add_argument("--out", default=os.path.join(ROOT, "out"))
@@ -68,10 +96,31 @@ def main():
                 print(arg, file=sys.stderr); sys.exit(2)
     elif kind == "word":
         arg = a.word or plan()[1]
+    elif kind == "review":
+        style, arg = plan_review()
+        if style is None:
+            print(arg, file=sys.stderr); sys.exit(2)
+        style = a.style or style
+        if a.words:
+            arg = a.words.split(",")
     else:
         arg = a.words.split(",") if a.words else plan()[1]
 
-    if kind == "word":
+    if kind == "review":
+        words = [word(w) for w in arg]
+        seed = datetime.now(VN).date().toordinal()
+        if style == "recall":
+            from engine.recall import render_recall
+            words = words[:3]
+            video = os.path.join(a.out, "review.mp4")
+            dur = render_recall(words, video, seed=seed, preview_png=os.path.join(a.out, "review.png"))
+        else:
+            from engine.quiz import render_quiz
+            video = os.path.join(a.out, "review.mp4")
+            dur, qs = render_quiz(words, video, seed=seed, preview_png=os.path.join(a.out, "review.png"))
+            words = [q["answer"] for q in qs] + [w for w in words if w not in [q["answer"] for q in qs]]
+        meta = {"kind": "review", "style": style, "words": [w["word"] for w in words], **review_meta(style, words)}
+    elif kind == "word":
         from engine.short import render_short
         wd = word(arg)
         video = os.path.join(a.out, f"{arg}.mp4")

@@ -25,7 +25,7 @@ def make_questions(words, n=3, seed=0):
         qs.append({"answer": ans, "options": opts, "correct": opts.index(ans)})
     return qs
 
-def _bg():
+def _bg(tag="quiz time"):
     rng = np.random.default_rng(11)
     arr = np.ones((H, W, 3), np.float32) * np.array(NEUTRAL, np.float32)
     arr += rng.normal(0, 5, (H, W, 1)).astype(np.float32)
@@ -38,7 +38,7 @@ def _bg():
             d.ellipse([x - 2.5, y - 2.5, x + 2.5, y + 2.5], fill=INK + (38,))
     d.rounded_rectangle([PX + 16, PY + 16, PX + PS + 16, PY + PS + 16], 40, fill=INK + (255,))
     f = inter("Bold", 30); f2 = gel(36, b"Bold Italic", italic=True)
-    t1, t2 = "DAILY ENGLISH", "quiz time"
+    t1, t2 = "DAILY ENGLISH", tag
     w1, w2 = d.textlength(t1, font=f), d.textlength(t2, font=f2)
     x = (W - (w1 + 72 + w2)) / 2
     d.rounded_rectangle([x, 104, x + w1 + 48, 160], 28, fill=INK + (255,))
