@@ -6,7 +6,9 @@ on:
   schedule:
     # 19:37 UTC = 02:37 Vietnam time. Runs early (and off the hour) so GitHub delays don't matter:
     # the video is scheduled to go public at PUBLISH_HOUR anyway.
-    - cron: "37 19 * * *"
+    - cron: "37 19 * * *"   # 02:37 VN (main)
+    - cron: "13 22 * * *"   # 05:13 VN (backup if GitHub dropped the first one)
+    - cron: "41 0 * * *"    # 07:41 VN (second backup)
   workflow_dispatch:
     inputs:
       kind:
@@ -42,7 +44,20 @@ env:
   KOKORO_DIR: ${{ github.workspace }}/models
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.c.outputs.run }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: c
+        env:
+          EVENT: ${{ github.event_name }}
+        run: python3 scripts/should_run.py
+
   post:
+    needs: check
+    if: ${{ needs.check.outputs.run == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
