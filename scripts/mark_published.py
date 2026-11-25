@@ -44,6 +44,8 @@ else:
         entry["words"] = meta["words"]
     if meta.get("style"):
         entry["style"] = meta["style"]
+    if meta.get("story"):
+        entry["story"] = meta["story"]
     data["published"].append(entry)
     print("Recorded", meta["kind"], meta["words"])
 json.dump(data, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)

@@ -10,6 +10,11 @@ Usage:
   python scripts/make_video.py --kind quiz --words stroll,sip,doze,soothing,linger
   python scripts/make_video.py --kind long --words stroll,sip,doze,soothing,linger
   python scripts/make_video.py --kind review                 # today's 12:00 review
+  python scripts/make_video.py --kind story --story rainy-evening
+
+Stories (stories/<name>.json, order in stories/queue.json) go out in the 12:00 slot on Sundays,
+once every word in the story has already been posted. A story is recorded as a review post
+with style "story", so the rest of the pipeline treats it like any other 12:00 post.
 """
 import argparse, json, os, random, sys
 from datetime import datetime, timedelta, timezone
@@ -17,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 BATCH = 5
-from scripts.captions import word_meta, quiz_meta, long_meta, review_meta
+from scripts.captions import word_meta, quiz_meta, long_meta, review_meta, story_meta
 VN = timezone(timedelta(hours=7))
 
 def load(p):
@@ -43,8 +48,23 @@ def plan():
         return None, "Queue is empty: add words to words/queue.json"
     return "long", batch[:BATCH]
 
+def story(name):
+    return load(f"stories/{name}.json")
+
+def next_story(public_words):
+    """First story in the queue that hasn't been posted and only uses words that are already public."""
+    pub = load("state/published.json")["published"]
+    done = {e.get("story") for e in pub if e.get("style") == "story"}
+    for name in load("stories/queue.json")["queue"]:
+        if name in done:
+            continue
+        if all(l["word"] in public_words for l in story(name)["lines"]):
+            return name
+    return None
+
 def plan_review(day=None):
-    """Pick 3 words that are already public, mostly recent ones. Even days: recall, odd days: quiz."""
+    """Sunday: the next ready story, if any. Otherwise pick 3 words that are already public,
+    mostly recent ones. Even days: recall, odd days: quiz."""
     day = day or datetime.now(VN).date()
     now = datetime.now(VN)
     pub = load("state/published.json")["published"]
@@ -59,6 +79,10 @@ def plan_review(day=None):
             seen.append(e["word"])
     if len(seen) < 3:
         return None, "Need at least 3 posted words for a review"
+    if day.weekday() == 6:
+        name = next_story(set(seen))
+        if name:
+            return "story", name
     pool = seen[-10:]
     rng = random.Random(day.toordinal())
     style = "recall" if day.toordinal() % 2 == 0 else "quiz"
@@ -78,8 +102,9 @@ def meta_long(words, chapters):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--kind", choices=["auto", "word", "quiz", "long", "review"], default="auto")
+    ap.add_argument("--kind", choices=["auto", "word", "quiz", "long", "review", "story"], default="auto")
     ap.add_argument("--style", choices=["recall", "quiz"], help="for --kind review (default: by date)")
+    ap.add_argument("--story", help="for --kind story: stories/<name>.json (empty = next ready story)")
     ap.add_argument("--word")
     ap.add_argument("--words", help="comma-separated, for quiz/long")
     ap.add_argument("--out", default=os.path.join(ROOT, "out"))
@@ -96,17 +121,36 @@ def main():
                 print(arg, file=sys.stderr); sys.exit(2)
     elif kind == "word":
         arg = a.word or plan()[1]
+    elif kind == "story":
+        kind, style, arg = "review", "story", a.story
+        if not arg:
+            pub = load("state/published.json")["published"]
+            arg = next_story({e["word"] for e in pub if e.get("kind", "word") == "word" and "word" in e})
+            if not arg:
+                print("No story ready: add one to stories/queue.json (all its words must be posted)", file=sys.stderr); sys.exit(2)
     elif kind == "review":
         style, arg = plan_review()
         if style is None:
             print(arg, file=sys.stderr); sys.exit(2)
-        style = a.style or style
+        if a.style:
+            style = a.style
+            if not isinstance(arg, list):          # today was a story day, but a word review was asked for
+                arg = plan_review(datetime.now(VN).date() - timedelta(days=1))[1]
         if a.words:
             arg = a.words.split(",")
     else:
         arg = a.words.split(",") if a.words else plan()[1]
 
-    if kind == "review":
+    if kind == "review" and style == "story":
+        from engine.story import render_story
+        st = story(arg)
+        words = [word(l["word"]) for l in st["lines"]]
+        video = os.path.join(a.out, "story.mp4")
+        dur, _ = render_story(st, words, video, music_seed=sum(map(ord, arg)),
+                              preview_png=os.path.join(a.out, "story.png"))
+        meta = {"kind": "review", "style": "story", "story": arg, "words": [w["word"] for w in words],
+                **story_meta(st, words)}
+    elif kind == "review":
         words = [word(w) for w in arg]
         seed = datetime.now(VN).date().toordinal()
         if style == "recall":

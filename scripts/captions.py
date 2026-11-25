@@ -81,3 +81,15 @@ def review_meta(style, words):
             "description": _body(lines, shorts=True),
             "facebook_description": _body(lines, shorts=False),
             "tags": TAGS + ["english review", "english quiz", "vocabulary quiz"] + names}
+
+def story_meta(story, words):
+    """Story Short: a tiny story that uses words we already taught (posted in the 12:00 slot)."""
+    names = [w["word"] for w in words]
+    lines = [f"📖 Story time: {story['title']}",
+             "🇻🇳 Nghe một câu chuyện ngắn và tìm những từ bạn đã học!", ""] + \
+            [f"• {w['word']} {w['ipa']} – {w['vi']}" for w in words] + \
+            ["", "💬 Which word do you like most? Write your own sentence with it!"]
+    return {"title": _fit(f"{story['title']} – A Tiny English Story ({', '.join(names)}) | {BRAND} #shorts"),
+            "description": _body(lines, shorts=True),
+            "facebook_description": _body(lines, shorts=False),
+            "tags": TAGS + ["english story", "short english story", "learn english with stories"] + names}

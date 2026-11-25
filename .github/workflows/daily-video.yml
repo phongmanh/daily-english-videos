@@ -2,7 +2,8 @@ name: Daily video
 
 # Two posts a day:
 #   18:00  the cycle: 5 x word Short  ->  long video (those 5 words)  ->  repeat
-#   12:00  review Short: 3 words already posted ("Do you remember?" or an A/B/C quiz, alternating)
+#   12:00  review Short: 3 words already posted ("Do you remember?" or an A/B/C quiz, alternating);
+#          on Sundays, the next story from stories/queue.json instead (when all its words are posted)
 # Runs at night (off the hour, so GitHub delays don't matter); the videos are scheduled to go public later.
 # Each slot has backups in case GitHub drops a scheduled run; only one run per slot posts each day.
 on:
@@ -18,13 +19,16 @@ on:
       kind:
         description: "What to make (auto = next in the cycle)"
         type: choice
-        options: [auto, word, review, long, quiz]
+        options: [auto, word, review, story, long, quiz]
         default: auto
       word:
         description: "For kind=word: which word (empty = next in queue)"
         required: false
       words:
         description: "For quiz/long: comma-separated words (empty = current batch)"
+        required: false
+      story:
+        description: "For kind=story: story name in stories/ (empty = next ready story)"
         required: false
       platforms:
         description: "Where to upload"
@@ -66,6 +70,7 @@ jobs:
             *) SLOT=word ;;
           esac
           [ "$IN_KIND" = "review" ] && SLOT=review
+          [ "$IN_KIND" = "story" ] && SLOT=review
           echo "slot=$SLOT" >> "$GITHUB_OUTPUT"
           # Vietnam time (UTC+7) when the post goes public
           if [ "$SLOT" = "review" ]; then echo "hour=12"; else echo "hour=18"; fi >> "$GITHUB_OUTPUT"
@@ -108,13 +113,15 @@ jobs:
 
       - name: Make the video
         env:
-          IN_KIND: ${{ needs.check.outputs.slot == 'review' && 'review' || inputs.kind || 'auto' }}
+          IN_KIND: ${{ inputs.kind == 'story' && 'story' || needs.check.outputs.slot == 'review' && 'review' || inputs.kind || 'auto' }}
           IN_WORD: ${{ inputs.word }}
           IN_WORDS: ${{ inputs.words }}
+          IN_STORY: ${{ inputs.story }}
         run: |
           args=(--kind "$IN_KIND")
           [ -n "$IN_WORD" ] && args+=(--word "$IN_WORD")
           [ -n "$IN_WORDS" ] && args+=(--words "$IN_WORDS")
+          [ -n "$IN_STORY" ] && args+=(--story "$IN_STORY")
           python scripts/make_video.py "${args[@]}"
           echo "KIND=$(python -c "import json;print(json.load(open('out/meta.json'))['kind'])")" >> $GITHUB_ENV
           echo "LABEL=$(python -c "import json;print('-'.join(json.load(open('out/meta.json'))['words']))")" >> $GITHUB_ENV
