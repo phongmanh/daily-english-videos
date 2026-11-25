@@ -21,6 +21,8 @@ data = json.load(open(p, encoding="utf-8"))
 def same(e):
     if e.get("kind", "word") != meta["kind"]:
         return False
+    if meta["kind"] == "review":          # a review is a new post every day
+        return e.get("publish_at") == a.publish_at
     return e.get("word") == meta["word"] if meta["kind"] == "word" else e.get("words") == meta["words"]
 
 existing = next((e for e in reversed(data["published"]) if same(e)), None)
@@ -40,6 +42,8 @@ else:
         entry["word"] = meta["word"]
     else:
         entry["words"] = meta["words"]
+    if meta.get("style"):
+        entry["style"] = meta["style"]
     data["published"].append(entry)
     print("Recorded", meta["kind"], meta["words"])
 json.dump(data, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)

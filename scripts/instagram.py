@@ -1,9 +1,10 @@
 """Instagram Reels via the Instagram Content Publishing API (Facebook Login / Page token).
 
 Instagram's API can't schedule posts, so this works in two steps:
-  prepare  (daily run, ~02:37): upload the video into a media container, save its id in
+  prepare  (night runs): upload the video into a media container, add it to
            state/pending_instagram.json. If the publish time is already close, publish right away.
-  publish  (second run, ~17:47): publish the saved container and record it in state/published.json.
+  publish  (11:47 and 17:47 runs): publish every saved container that is due within 30 minutes
+           and record it in state/published.json.
 
 Needs env: FB_PAGE_ID, FB_PAGE_TOKEN (Page token with instagram_basic + instagram_content_publish).
 Optional env: IG_AI_LABEL=true|false (default true) – adds Instagram's "AI info" label.
@@ -79,10 +80,27 @@ def publish_container(ig, container):
     r = requests.post(f"{API}/{ig}/media_publish", data={"creation_id": container, "access_token": token()}, timeout=60)
     return check(r)["id"]
 
-def record(meta_kind, words, media_id):
+def load_pending():
+    if not os.path.exists(PENDING):
+        return []
+    p = json.load(open(PENDING, encoding="utf-8"))
+    return p if isinstance(p, list) else [p]
+
+def save_pending(items):
+    if items:
+        json.dump(items, open(PENDING, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    elif os.path.exists(PENDING):
+        os.remove(PENDING)
+
+def record(meta_kind, words, media_id, publish_at=None):
     data = json.load(open(PUBLISHED, encoding="utf-8"))
     for e in reversed(data["published"]):
-        same = (e.get("word") == words[0]) if meta_kind == "word" else (e.get("words") == words)
+        if meta_kind == "word":
+            same = e.get("word") == words[0]
+        elif meta_kind == "review":
+            same = e.get("words") == words and e.get("publish_at") == publish_at
+        else:
+            same = e.get("words") == words
         if e.get("kind", "word") == meta_kind and same:
             e["instagram_id"] = media_id
             break
@@ -107,26 +125,42 @@ def cmd_prepare(a):
         write_output("instagram_id", media)
         write_output("instagram_pending", "")
         return
-    json.dump({"ig_user_id": ig, "container": container, "kind": meta["kind"], "words": meta["words"],
-               "publish_at": a.publish_at, "created": int(time.time())},
-              open(PENDING, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(f"Instagram: will publish at {a.publish_at} (second run)")
+    items = load_pending()
+    items.append({"ig_user_id": ig, "container": container, "kind": meta["kind"], "words": meta["words"],
+                  "publish_at": a.publish_at, "created": int(time.time())})
+    save_pending(items)
+    print(f"Instagram: will publish at {a.publish_at} (Publish Instagram run)")
     write_output("instagram_pending", container)
 
 def cmd_publish(a):
-    if not os.path.exists(PENDING):
+    items = load_pending()
+    if not items:
         print("Nothing waiting for Instagram.")
         return
-    p = json.load(open(PENDING, encoding="utf-8"))
-    if time.time() - p["created"] > 23 * 3600:
-        os.remove(PENDING)
-        sys.exit("The waiting Instagram upload is older than 23 hours (Instagram expires it). Re-run with platforms=instagram.")
-    media = publish_container(p["ig_user_id"], p["container"])
-    record(p["kind"], p["words"], media)
-    os.remove(PENDING)
-    print(f"Instagram Reel published: {media} ({p['kind']}: {', '.join(p['words'])})")
-    write_output("instagram_id", media)
-    write_output("label", "-".join(p["words"]))
+    keep, done, errors = [], [], []
+    for p in items:
+        if time.time() - p["created"] > 23 * 3600:
+            errors.append(f"{p['kind']} {'-'.join(p['words'])}: older than 23 hours (Instagram expires it); re-run with platforms=instagram")
+            continue
+        due = not p.get("publish_at") or datetime.fromisoformat(p["publish_at"]).timestamp() - time.time() < 30 * 60
+        if not due:
+            keep.append(p)
+            continue
+        try:
+            media = publish_container(p["ig_user_id"], p["container"])
+        except (SystemExit, requests.HTTPError) as e:
+            errors.append(f"{p['kind']} {'-'.join(p['words'])}: {e}")
+            continue
+        record(p["kind"], p["words"], media, p.get("publish_at"))
+        done.append("-".join(p["words"]))
+        print(f"Instagram Reel published: {media} ({p['kind']}: {', '.join(p['words'])})")
+        write_output("instagram_id", media)
+    save_pending(keep)
+    write_output("label", " + ".join(done) or "nothing due")
+    if keep:
+        print(f"Still waiting: {len(keep)} (later run)")
+    if errors:
+        sys.exit("Instagram problems:\n" + "\n".join(errors))
 
 def main():
     ap = argparse.ArgumentParser()

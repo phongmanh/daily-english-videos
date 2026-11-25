@@ -57,8 +57,8 @@ Uses the same `FB_PAGE_ID` / `FB_PAGE_TOKEN` — no new secrets.
 2. Meta app → **Use cases → Add** → **Manage messaging & content on Instagram** → *API setup with Facebook login*.
 3. Generate the Page token again with `instagram_basic` and `instagram_content_publish` added (choose the Page **and** the Instagram account in the pop-up), and update `FB_PAGE_TOKEN`.
 
-Instagram's API can't schedule posts, so the 02:37 run uploads the Reel and **Publish Instagram**
-(17:47 Vietnam time) publishes it. Instagram's "AI info" label is added (set `IG_AI_LABEL: "false"` in the workflow env to turn it off).
+Instagram's API can't schedule posts, so the night runs upload the Reels and **Publish Instagram**
+(11:47 and 17:47 Vietnam time) publishes them. Instagram's "AI info" label is added (set `IG_AI_LABEL: "false"` in the workflow env to turn it off).
 
 ## 3. Test
 
@@ -68,9 +68,10 @@ GitHub → **Actions → Daily video → Run workflow**
 
 ## Daily schedule
 
-- Runs every day at **02:37 Vietnam time** (GitHub may start it late — that's OK).
-- The post goes public at **18:00 Vietnam time** (change `PUBLISH_HOUR` in `.github/workflows/daily-video.yml`).
-- Cycle: 5 word Shorts → 1 quiz Short → 1 long video → repeat. The long video takes ~10–15 min to make.
+- Two posts a day, made at night (GitHub may start runs late — that's OK; backups run if one is dropped):
+  - **18:00** (made ~02:37): the cycle 5 word Shorts → 1 long video → repeat. The long video takes ~10–15 min to make.
+  - **12:00** (made ~03:07): a review Short with 3 words already posted — "Do you remember?" and an A/B/C quiz on alternate days.
+- To post a review by hand: **Run workflow** with kind = **review**.
 - Posts are recorded in `state/published.json`; the next word comes from `words/queue.json`.
 
 ## If something breaks

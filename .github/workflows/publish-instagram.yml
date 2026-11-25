@@ -1,10 +1,11 @@
 name: Publish Instagram
 
-# Instagram's API can't schedule posts. The daily run (02:37) uploads the Reel and saves it in
-# state/pending_instagram.json; this run publishes it in the evening.
+# Instagram's API can't schedule posts. The night runs upload the Reels and save them in
+# state/pending_instagram.json; these runs publish whatever is due (12:00 review, 18:00 post).
 on:
   schedule:
-    - cron: "47 10 * * *"   # 10:47 UTC = 17:47 Vietnam time (GitHub may start it a little late)
+    - cron: "47 4 * * *"    # 04:47 UTC = 11:47 Vietnam time (12:00 review)
+    - cron: "47 10 * * *"   # 10:47 UTC = 17:47 Vietnam time (18:00 post)
   workflow_dispatch:
 
 permissions:
@@ -28,7 +29,7 @@ jobs:
       - name: Install requests
         run: pip install requests
 
-      - name: Publish the waiting Reel
+      - name: Publish the waiting Reels that are due
         id: ig
         env:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}

@@ -19,14 +19,14 @@ Manual run: **Actions → Daily video → Run workflow** (choose kind, words, or
 ## How it works
 
 ```
-GitHub Actions (daily, 02:37 VN)  .github/workflows/daily-video.yml
-  └─ scripts/make_video.py      decides word / quiz / long from state/published.json → out/*.mp4 + meta.json
-  └─ scripts/upload_youtube.py  private, publishAt 18:00 VN
-  └─ scripts/upload_facebook.py Reel (Shorts) or video post (long), scheduled 18:00 VN
+GitHub Actions (daily, 02:37 VN → 18:00 post; 03:07 VN → 12:00 review)  .github/workflows/daily-video.yml
+  └─ scripts/make_video.py      decides word / long (18:00) or review (12:00) from state/published.json → out/*.mp4 + meta.json
+  └─ scripts/upload_youtube.py  private, publishAt 18:00 / 12:00 VN
+  └─ scripts/upload_facebook.py Reel (Shorts) or video post (long), scheduled 18:00 / 12:00 VN
   └─ scripts/instagram.py prepare  uploads the Reel, saves it in state/pending_instagram.json
   └─ scripts/mark_published.py  records the post in state/published.json (commit)
-GitHub Actions (daily, 17:47 VN)  .github/workflows/publish-instagram.yml
-  └─ scripts/instagram.py publish  publishes the waiting Instagram Reel
+GitHub Actions (daily, 11:47 and 17:47 VN)  .github/workflows/publish-instagram.yml
+  └─ scripts/instagram.py publish  publishes the waiting Instagram Reels that are due
 ```
 
 ## Folders
@@ -38,7 +38,8 @@ GitHub Actions (daily, 17:47 VN)  .github/workflows/publish-instagram.yml
 | `state/published.json` | What has been posted (don't edit by hand unless re-posting) |
 | `engine/art/` | One illustration class per word (`WORD = "..."`, `frame(t)` → 1600×1600 image) |
 | `engine/short.py` | Word Short |
-| `engine/quiz.py` | Quiz Short |
+| `engine/quiz.py` | Quiz Short (A/B/C) |
+| `engine/recall.py` | "Do you remember?" review Short |
 | `engine/long.py` | Weekly long video |
 | `engine/voice.py` | Narration script + Kokoro TTS |
 | `engine/music.py` | Generated background music |
@@ -58,4 +59,5 @@ curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-fil
 curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin && mv voices-v1.0.bin voices.bin
 cd .. && python scripts/make_video.py --kind word --word stroll
 python scripts/make_video.py --kind quiz --words stroll,sip,doze,soothing,linger
+python scripts/make_video.py --kind review --style recall   # 12:00 review
 ```
