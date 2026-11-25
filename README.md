@@ -8,6 +8,10 @@ Makes one post every day for YouTube and Facebook, in a repeating 7-day cycle:
 | 6 | **Quiz Short** (3 questions on those 5 words) | Short | Reel | Reel |
 | 7 | **Long video** (all 5 words, with chapters) | Video | Video post | Reel |
 
+At 12:00 every day there is a review Short. **On Sundays** it is a **Story Short** instead, when a story
+is ready: a tiny story (~40 s) where each line uses one word we already taught, then a
+"Do you remember?" recap. Stories live in `stories/`, in the order of `stories/queue.json`.
+
 Each Short (~30–35 s, 1080×1920): today's word → syllables with stress → "sounds like" → pronunciation tip →
 "your turn" pause → Vietnamese meaning → definition → example → follow reminder.
 Paper-style background, a new illustration per word, Kokoro AI voice, original background music.
@@ -41,6 +45,8 @@ GitHub Actions (daily, 11:47 and 17:47 VN)  .github/workflows/publish-instagram.
 | `engine/quiz.py` | Quiz Short (A/B/C) |
 | `engine/recall.py` | "Do you remember?" review Short |
 | `engine/long.py` | Weekly long video |
+| `engine/story.py` | Story Short (one word per line, words light up as they are read) |
+| `stories/<name>.json` | One story: title + lines (`stories/queue.json` = posting order) |
 | `engine/voice.py` | Narration script + Kokoro TTS |
 | `engine/music.py` | Generated background music |
 | `assets/fonts/` | Inter, Gelasio, DejaVu Sans (open licenses included) |
@@ -51,6 +57,15 @@ GitHub Actions (daily, 11:47 and 17:47 VN)  .github/workflows/publish-instagram.
 2. Add an illustration class with `WORD = "<word>"` in `engine/art/` (any file in that folder is loaded).
 3. Append the word to `words/queue.json`.
 
+## Add a story
+
+1. Add `stories/<name>.json` (copy `stories/rainy-evening.json`): a `title` and 3–5 `lines`.
+   Each line has one `word` (must already exist in `words/`, with an illustration) and the `text` shown on screen.
+   The word must appear in the text in one of its `forms` (e.g. "sipped"). Add `say` only if the voice
+   should read it differently (extra commas or "..." for pauses).
+2. Append the name to `stories/queue.json`. It posts on the first Sunday at 12:00 when all its words are public.
+   To post it now: **Actions → Daily video → Run workflow**, kind = `story`, story = `<name>`.
+
 Test locally:
 ```bash
 pip install -r requirements.txt   # plus ffmpeg on your PATH
@@ -60,4 +75,5 @@ curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-fil
 cd .. && python scripts/make_video.py --kind word --word stroll
 python scripts/make_video.py --kind quiz --words stroll,sip,doze,soothing,linger
 python scripts/make_video.py --kind review --style recall   # 12:00 review
+python scripts/make_video.py --kind story --story rainy-evening
 ```

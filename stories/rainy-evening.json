@@ -1,0 +1,12 @@
+{
+ "title": "A Rainy Evening",
+ "lines": [
+  {"word": "cozy", "text": "It was raining outside, but Mai's little room was warm and cozy.",
+   "say": "It was raining outside, but Mai's little room was warm, and cozy."},
+  {"word": "sip", "text": "She made a cup of Vietnamese coffee and sipped it slowly."},
+  {"word": "soothing", "text": "The sound of the rain was so soothing.",
+   "say": "The sound of the rain... was so soothing."},
+  {"word": "drowsy", "text": "Soon, she felt drowsy, and she fell asleep.",
+   "say": "Soon, she felt drowsy... and she fell asleep."}
+ ]
+}
