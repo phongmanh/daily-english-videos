@@ -88,7 +88,7 @@ def plan_review(day=None):
     style = "recall" if day.toordinal() % 2 == 0 else "quiz"
     if style == "quiz":
         return style, rng.sample(pool, min(5, len(pool)))
-    return style, rng.sample(pool, 3)
+    return style, rng.sample(pool, 2)   # 2 words keeps it under 40 s (Instagram limit)
 
 def meta_word(wd):
     return {"kind": "word", "word": wd["word"], "words": [wd["word"]], **word_meta(wd)}
@@ -155,7 +155,7 @@ def main():
         seed = datetime.now(VN).date().toordinal()
         if style == "recall":
             from engine.recall import render_recall
-            words = words[:3]
+            words = words[:2]
             video = os.path.join(a.out, "review.mp4")
             dur = render_recall(words, video, seed=seed, preview_png=os.path.join(a.out, "review.png"))
         else:

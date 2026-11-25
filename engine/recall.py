@@ -1,4 +1,4 @@
-"""Review Short (1080x1920): 3 words we already posted. Show the word, the viewer recalls
+"""Review Short (1080x1920): 2 words we already posted. Show the word, the viewer recalls
 the meaning during a countdown, then the picture, Vietnamese meaning and example are revealed."""
 import math, os, tempfile
 import numpy as np
@@ -40,7 +40,7 @@ def build_scene(words, dur, mk):
         y += en.getbbox()[3] + 30
         ex = simple("“" + w["example"] + "”", gel(48, b"Bold Italic", italic=True), INK, TWS, 64)
         blocks.append(Block(ex, X0, y, first(f"w{i}_ex") - 0.15, t_out))
-    blocks += title("How many did you remember?", "Comment your score: 0, 1, 2 or 3!", starts[-1])
+    blocks += title("How many did you remember?", "Comment your score: " + ", ".join(map(str, range(n))) + " or " + str(n) + "!", starts[-1])
     bgc = np.array(NEUTRAL, np.float32); inkc = np.array(INK, np.float32)
     counts = [mk[f"w{i}_count"][0] for i in range(n)]
     qfont = gel(300, b"Bold")

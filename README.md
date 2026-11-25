@@ -8,6 +8,10 @@ Makes one post every day for YouTube and Facebook, in a repeating 7-day cycle:
 | 6 | **Quiz Short** (3 questions on those 5 words) | Short | Reel | Reel |
 | 7 | **Long video** (all 5 words, with chapters) | Video | Video post | Reel |
 
+**Instagram limit:** Instagram's API refuses Reels longer than about 40 s, so Shorts are kept under 40 s
+(quiz = 3 questions, options shown but not read; recall = 2 words). Anything longer (the weekly long video)
+is skipped on Instagram with a warning; YouTube and Facebook still post. Change with the `IG_MAX_SECONDS` env.
+
 At 12:00 every day there is a review Short. **On Sundays** it is a **Story Short** instead, when a story
 is ready: a tiny story (~40 s) where each line uses one word we already taught, then a
 "Do you remember?" recap. Stories live in `stories/`, in the order of `stories/queue.json`.
