@@ -84,40 +84,40 @@ def short_track(W):
 NUM = ["one", "two", "three", "four", "five"]
 
 def quiz_track(questions):
-    """questions: list of {"answer": word dict, "options": [word dicts], "correct": index}."""
-    tr = Track(0.5)
-    tr.add("intro", say("Quiz time! How many can you get?"), 0.6)
+    """questions: list of {"answer": word dict, "options": [word dicts], "correct": index}.
+    Kept under 40 s (Instagram refuses longer Reels): the options are shown, not read out."""
+    tr = Track(0.4)
+    tr.add("intro", say("Quiz time!"), 0.4)
     for qi, q in enumerate(questions):
-        tr.add(f"q{qi}", say(f"Question {NUM[qi]}. Which word means: {q['answer']['mean_say']}"), 0.4)
-        for oi, o in enumerate(q["options"]):
-            tr.add(f"q{qi}_l{oi}", say("ABC"[oi] + "."), 0.12)
-            tr.add(f"q{qi}_o{oi}", say(o["ph"], ph=True), 0.35)
+        tr.add(f"q{qi}", say(f"{NUM[qi].capitalize()}. Which word means: {q['answer']['mean_say']}"), 0.1)
+        for oi in range(len(q["options"])):          # options pop in one after another (no speech)
+            tr.marks[f"q{qi}_l{oi}"] = [[round(tr.t + 0.2 * oi, 3), round(tr.t + 0.2 * oi, 3)]]
         st = tr.t
         tr.gap(3.0)
         tr.marks[f"q{qi}_count"] = [[round(st, 3), round(tr.t, 3)]]
-        tr.add(f"q{qi}_ans", say("The answer is:"), 0.15)
-        tr.add(f"q{qi}_word", say(q["answer"]["ph"], ph=True), 1.0)
-    tr.add("outro", say("How many did you get? Comment your score!"), 0.0)
-    audio, dur = tr.render(1.6)
+        tr.marks[f"q{qi}_ans"] = [[round(tr.t, 3), round(tr.t, 3)]]
+        tr.add(f"q{qi}_word", say(q["answer"]["ph"], ph=True), 0.7)
+    tr.add("outro", say("How many did you get?"), 0.0)
+    audio, dur = tr.render(1.4)
     return audio, dur, tr.marks
 
 def recall_track(words):
-    """Review Short: show a word we already learned, the viewer recalls the meaning, then reveal."""
-    tr = Track(0.5)
-    tr.add("intro", say("Review time! Do you still remember these words?"), 0.6)
+    """Review Short: show a word we already learned, the viewer recalls the meaning, then reveal.
+    Use 2 words to stay under 40 s (Instagram refuses longer Reels)."""
+    tr = Track(0.4)
+    tr.add("intro", say("Do you still remember these words?"), 0.4)
     for i, W in enumerate(words):
-        tr.add(f"w{i}", say(f"Word {NUM[i]}."), 0.3)
-        tr.add(f"w{i}_word", say(W["ph"], ph=True), 0.5)
-        tr.add(f"w{i}_ask", say("What does it mean?"), 0.2)
+        tr.marks[f"w{i}"] = [[round(tr.t, 3), round(tr.t, 3)]]
+        tr.add(f"w{i}_word", say(W["ph"], ph=True), 0.3)
+        tr.add(f"w{i}_ask", say("What does it mean?"), 0.1)
         st = tr.t
         tr.gap(3.0)
         tr.marks[f"w{i}_count"] = [[round(st, 3), round(tr.t, 3)]]
-        tr.add(f"w{i}_mean", say("It means: " + W["mean_say"]), 0.5)
-        tr.add(f"w{i}_ex", say(W["ex_say"]), 0.5)
-        tr.add(f"w{i}_rep", say("Say it again:"), 0.2)
-        tr.add(f"w{i}_rep2", say(W["ph"], ph=True), 1.1)
-    tr.add("outro", say("How many did you remember? Tell me in the comments!"), 0.0)
-    audio, dur = tr.render(1.6)
+        tr.add(f"w{i}_mean", say("It means: " + W["mean_say"]), 0.35)
+        tr.add(f"w{i}_ex", say(W["ex_say"]), 0.35)
+        tr.add(f"w{i}_rep2", say(W["ph"], ph=True), 0.8)
+    tr.add("outro", say("How many did you remember?"), 0.0)
+    audio, dur = tr.render(1.4)
     return audio, dur, tr.marks
 
 def long_tracks(words, intro="Here are this week's five words. Listen, and repeat after me."):

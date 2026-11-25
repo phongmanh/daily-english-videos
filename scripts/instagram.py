@@ -54,12 +54,17 @@ def create_container(ig, caption):
     return check(r)["id"]
 
 def upload(container, path):
+    """Upload the bytes; Meta sometimes refuses the first POST into a fresh container, so try twice."""
     size = os.path.getsize(path)
-    with open(path, "rb") as f:
-        r = requests.post(f"https://rupload.facebook.com/ig-api-upload/{V}/{container}",
-                          headers={"Authorization": f"OAuth {token()}", "offset": "0", "file_size": str(size)},
-                          data=f, timeout=900)
-    check(r)
+    for attempt in range(2):
+        with open(path, "rb") as f:
+            r = requests.post(f"https://rupload.facebook.com/ig-api-upload/{V}/{container}",
+                              headers={"Authorization": f"OAuth {token()}", "offset": "0", "file_size": str(size)},
+                              data=f, timeout=900)
+        if r.ok or attempt == 1:
+            return check(r)
+        print(f"Instagram upload refused ({r.status_code}), trying once more: {r.text[:200]}", file=sys.stderr)
+        time.sleep(5)
 
 def wait_ready(container, max_wait=900):
     t0 = time.time()
@@ -112,8 +117,17 @@ def write_output(key, value):
         with open(out, "a") as f:
             f.write(f"{key}={value}\n")
 
+# Instagram's upload server refuses Reels longer than about 40 s through the API
+# (ProcessingFailedError), even though the docs say 15 min. Longer videos are skipped, not failed.
+MAX_SECONDS = float(os.environ.get("IG_MAX_SECONDS", "40"))
+
 def cmd_prepare(a):
     meta = json.load(open(a.meta, encoding="utf-8"))
+    if meta.get("duration", 0) > MAX_SECONDS:
+        msg = f"Instagram skipped: video is {meta['duration']:.0f} s, Instagram only accepts up to {MAX_SECONDS:.0f} s via the API"
+        print(f"::warning::{msg}")
+        write_output("instagram_skipped", msg)
+        return
     ig = ig_user_id()
     container = create_container(ig, meta["facebook_description"])
     upload(container, meta["video"])

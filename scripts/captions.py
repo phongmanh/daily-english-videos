@@ -69,7 +69,7 @@ def review_meta(style, words):
         lines = ["🧠 Daily Review: Do you still remember these words?",
                  "🇻🇳 Ôn tập: bạn còn nhớ nghĩa của những từ này không?", ""] + \
                 [f"• {w['word']} {w['ipa']}" for w in words] + \
-                ["", "💬 Comment how many you remembered: 0, 1, 2 or 3!"]
+                ["", f"💬 Comment how many you remembered: 0 to {len(words)}!"]
         title = f"Do You Remember? {', '.join(names)} – Daily Review | {BRAND} #shorts"
     else:
         lines = ["🧠 Quick Quiz: Can you get 3/3?",

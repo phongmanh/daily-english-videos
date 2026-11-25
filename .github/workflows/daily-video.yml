@@ -190,5 +190,6 @@ jobs:
             [ -n "${{ steps.fb.outputs.facebook_id }}" ] && echo "- Facebook id: ${{ steps.fb.outputs.facebook_id }}"
             [ -n "${{ steps.ig.outputs.instagram_pending }}" ] && echo "- Instagram: uploaded, publishes in the next Publish Instagram run (11:47 / 17:47)"
             [ -n "${{ steps.ig.outputs.instagram_id }}" ] && echo "- Instagram: published (${{ steps.ig.outputs.instagram_id }})"
+            [ -n "${{ steps.ig.outputs.instagram_skipped }}" ] && echo "- ${{ steps.ig.outputs.instagram_skipped }}"
             echo "- Preview: see *Artifacts* below (kept 3 days)"
           } >> $GITHUB_STEP_SUMMARY
