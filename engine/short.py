@@ -116,6 +116,18 @@ def build_scene(wd, dur, mk):
         hit = x.strip(".,!?\"'").lower() in wd["forms"]
         toks.append((x, inter("BoldItalic" if hit else "Italic", 36), accent if hit else INK))
     blocks.append(Block(render_rich([("Example:", inter("SemiBold", 30), MUTE)] + toks, TWS, 50), X0, y, first("example") - 0.1))
+    if "vntip" in mk and wd.get("vn_tip"):
+        tw_ = PS - 40
+        body = render_rich([(x, inter("SemiBold", 32), INK) for x in wd["vn_tip"].split(" ")], tw_ - 48, 44)
+        body = body.crop((0, 0, body.width, body.getbbox()[3] + 4))
+        bh = body.height + 82
+        cb = Image.new("RGBA", (tw_ + 8, bh + 8), (0, 0, 0, 0))
+        cdr = ImageDraw.Draw(cb)
+        cdr.rounded_rectangle([8, 8, tw_ + 7, bh + 7], 26, fill=INK)
+        cdr.rounded_rectangle([0, 0, tw_ - 1, bh - 1], 26, fill=PAPER, outline=INK, width=4)
+        cdr.text((24, 22), "NGƯỜI VIỆT HAY NHẦM  ·  TIP", font=inter("Bold", 22), fill=accent)
+        cb.alpha_composite(body, (24, 58))
+        blocks.append(Block(cb, PX + 20, PY + PS - bh - 28, first("vntip") - 0.1, first("turn_say") - 0.2))
     BW = 660
     fbn = Image.new("RGBA", (BW + 8, 104), (0, 0, 0, 0))
     fd = ImageDraw.Draw(fbn)

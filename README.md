@@ -46,7 +46,7 @@ GitHub Actions (daily, 17:47 VN)  .github/workflows/publish-instagram.yml
 
 ## Add new words
 
-1. Add `words/<word>.json` (copy `words/stroll.json`; `ph`/`syl` are Kokoro phonemes, e.g. `kˈoʊzi`; `note`/`tip` are shown on screen, `note_say`/`tip_say`/`mean_say`/`ex_say` are read aloud).
+1. Add `words/<word>.json` (copy `words/stroll.json`; `ph`/`syl` are Kokoro phonemes, e.g. `kˈoʊzi`; `note`/`tip`/`vn_tip` are shown on screen, `note_say`/`tip_say`/`vn_tip_say`/`mean_say`/`ex_say` are read aloud; `vn_tip` is the "Người Việt hay nhầm" tip for Vietnamese speakers).
 2. Add an illustration class with `WORD = "<word>"` in `engine/art/` (any file in that folder is loaded).
 3. Append the word to `words/queue.json`.
 
