@@ -18,6 +18,9 @@ Checks before anything is saved:
 Usage:
   ANTHROPIC_API_KEY=... python scripts/auto_words.py            # only if the queue is low
   ANTHROPIC_API_KEY=... python scripts/auto_words.py --force    # add a batch now
+  python scripts/auto_words.py --status                         # is the queue low? (no key needed)
+  python scripts/auto_words.py --check bloom gentle             # check words written without the API
+                                                                #   (e.g. by the scheduled Claude task)
 Optional: CLAUDE_MODEL (default below).
 """
 import argparse, ast, json, os, re, subprocess, sys, tempfile, time
@@ -348,11 +351,59 @@ def make_art(wd, example):
 
 # ---------------------------------------------------------------- main
 
+def check_files(words):
+    """Check words that were written by hand (or by a Claude session) instead of by the API.
+    Sets ph from Kokoro, then checks the data, the syllables, the queue and the drawing.
+    Returns the number of problems (0 = all good)."""
+    queue = load("words/queue.json")["queue"]
+    problems = 0
+    for w in words:
+        print(f"== {w}")
+        try:
+            wd = load(f"words/{w}.json")
+        except (OSError, ValueError) as e:
+            print(f"  ERROR: words/{w}.json: {e}"); problems += 1; continue
+        errs = check_word(wd, set(known_words()) - {w})
+        ph = phonemes(w)
+        if wd.get("ph") != ph:
+            print(f"  ph set from Kokoro: {wd.get('ph')!r} -> {ph!r}")
+            wd["ph"] = ph
+            save(f"words/{w}.json", wd)
+        syl, chips = wd.get("syl"), wd.get("chips") or []
+        if not (isinstance(syl, list) and "".join(syl) == ph and len(syl) == len(chips)):
+            errs.append(f"syl must have {len(chips)} pieces that join to exactly {ph!r} (got {syl!r})")
+        if w not in queue:
+            errs.append("not in words/queue.json")
+        art = os.path.join(ROOT, "engine", "art", f"auto_{w}.py")
+        if os.path.exists(art):
+            code = open(art, encoding="utf-8").read()
+            errs += check_code(code, w) or test_render(code, w)
+        else:
+            print(f"  note: no engine/art/auto_{w}.py, the backup picture will be used")
+        for e in errs:
+            print(f"  ERROR: {e}")
+        problems += len(errs)
+        if not errs:
+            print(f"  OK (preview: out/new_art_{w}.png)" if os.path.exists(art) else "  OK")
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true", help="add a batch even if the queue is not low")
     ap.add_argument("--count", type=int, default=BATCH)
+    ap.add_argument("--status", action="store_true", help="print the unposted queue words and exit")
+    ap.add_argument("--check", nargs="+", metavar="WORD", help="check words that were written without the API")
     a = ap.parse_args()
+
+    if a.status:
+        left = unposted_left()
+        print(f"unposted={len(left)} low={'yes' if len(left) < MIN_LEFT else 'no'} words={','.join(left)}")
+        return
+    if a.check:
+        n = check_files(a.check)
+        print("All good." if n == 0 else f"{n} problem(s).")
+        sys.exit(1 if n else 0)
 
     left = unposted_left()
     print(f"Unposted words in the queue: {left}")
