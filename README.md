@@ -12,6 +12,10 @@ Makes one post every day for YouTube and Facebook, in a repeating 7-day cycle:
 (quiz = 3 questions, options shown but not read; recall = 2 words). Anything longer (the weekly long video)
 is skipped on Instagram with a warning; YouTube and Facebook still post. Change with the `IG_MAX_SECONDS` env.
 
+**TikTok:** every video is also sent to your TikTok inbox as a draft (`scripts/tiktok.py`). Open it in the
+TikTok app, paste the caption from <https://phongmanh.github.io/daily-english-videos/tiktok.html> and post.
+Setup: SETUP.md section 2c.
+
 At 12:00 every day there is a review Short. **On Sundays** it is a **Story Short** instead, when a story
 is ready: a tiny story (~40 s) where each line uses one word we already taught, then a
 "Do you remember?" recap. Stories live in `stories/`, in the order of `stories/queue.json`.

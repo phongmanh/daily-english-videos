@@ -33,7 +33,7 @@ on:
       platforms:
         description: "Where to upload"
         type: choice
-        options: [all, youtube, facebook, instagram]
+        options: [all, youtube, facebook, instagram, tiktok]
         default: all
       dry_run:
         description: "Only make the video, don't upload"
@@ -168,15 +168,30 @@ jobs:
           if [ -z "$FB_PAGE_TOKEN" ]; then echo "::warning::Facebook/Instagram secrets not set — skipping (see SETUP.md)"; exit 0; fi
           python scripts/instagram.py prepare out/meta.json --publish-at "$PUBLISH_AT"
 
+      - name: Send to TikTok inbox (you post it in the TikTok app)
+        id: tt
+        if: ${{ !cancelled() && !inputs.dry_run && env.KIND != '' && (inputs.platforms == '' || inputs.platforms == 'all' || inputs.platforms == 'tiktok') }}
+        continue-on-error: true
+        env:
+          TT_CLIENT_KEY: ${{ secrets.TT_CLIENT_KEY }}
+          TT_CLIENT_SECRET: ${{ secrets.TT_CLIENT_SECRET }}
+          TT_REFRESH_TOKEN: ${{ secrets.TT_REFRESH_TOKEN }}
+          TT_TOKEN_KEY: ${{ secrets.TT_TOKEN_KEY }}
+        run: |
+          if [ -z "$TT_REFRESH_TOKEN" ]; then echo "::notice::TikTok secrets not set — skipping (see SETUP.md)"; exit 0; fi
+          python scripts/tiktok.py send out/meta.json --publish-at "$PUBLISH_AT"
+
       - name: Record as posted
-        if: ${{ !cancelled() && !inputs.dry_run && (steps.yt.outputs.youtube_id != '' || steps.fb.outputs.facebook_id != '' || steps.ig.outputs.instagram_id != '' || steps.ig.outputs.instagram_pending != '') }}
+        if: ${{ !cancelled() && !inputs.dry_run && (steps.yt.outputs.youtube_id != '' || steps.fb.outputs.facebook_id != '' || steps.ig.outputs.instagram_id != '' || steps.ig.outputs.instagram_pending != '' || steps.tt.outputs.tiktok_id != '') }}
         run: |
           python scripts/mark_published.py out/meta.json --youtube "${{ steps.yt.outputs.youtube_id }}" \
-            --facebook "${{ steps.fb.outputs.facebook_id }}" --instagram "${{ steps.ig.outputs.instagram_id }}" --publish-at "$PUBLISH_AT"
+            --facebook "${{ steps.fb.outputs.facebook_id }}" --instagram "${{ steps.ig.outputs.instagram_id }}" \
+            --tiktok "${{ steps.tt.outputs.tiktok_id }}" --publish-at "$PUBLISH_AT"
           git config user.name "daily-english-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add state/published.json
           [ -f state/pending_instagram.json ] && git add state/pending_instagram.json
+          for f in docs/tiktok.json state/tiktok_token.enc; do [ -f "$f" ] && git add "$f"; done
           git commit -m "Posted $KIND: $LABEL (public $PUBLISH_AT)"
           git pull --rebase --quiet && git push
 
@@ -191,5 +206,8 @@ jobs:
             [ -n "${{ steps.ig.outputs.instagram_pending }}" ] && echo "- Instagram: uploaded, publishes in the next Publish Instagram run (11:47 / 17:47)"
             [ -n "${{ steps.ig.outputs.instagram_id }}" ] && echo "- Instagram: published (${{ steps.ig.outputs.instagram_id }})"
             [ -n "${{ steps.ig.outputs.instagram_skipped }}" ] && echo "- ${{ steps.ig.outputs.instagram_skipped }}"
+            [ -n "${{ steps.tt.outputs.tiktok_id }}" ] && echo "- TikTok: draft sent to your inbox — post it in the app (caption: https://phongmanh.github.io/daily-english-videos/tiktok.html)"
+            [ -n "${{ steps.tt.outputs.tiktok_skipped }}" ] && echo "- ${{ steps.tt.outputs.tiktok_skipped }}"
+            [ "${{ steps.tt.outcome }}" = "failure" ] && echo "- TikTok: failed (see the TikTok step log)"
             echo "- Preview: see *Artifacts* below (kept 3 days)"
           } >> $GITHUB_STEP_SUMMARY

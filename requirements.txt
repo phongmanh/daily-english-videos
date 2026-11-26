@@ -5,3 +5,4 @@ kokoro-onnx
 google-api-python-client
 google-auth
 requests
+cryptography

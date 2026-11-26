@@ -12,6 +12,7 @@ ap.add_argument("meta")
 ap.add_argument("--youtube", default="")
 ap.add_argument("--facebook", default="")
 ap.add_argument("--instagram", default="")
+ap.add_argument("--tiktok", default="", help="TikTok publish id (draft sent to the inbox)")
 ap.add_argument("--publish-at", default="")
 a = ap.parse_args()
 meta = json.load(open(a.meta, encoding="utf-8"))
@@ -33,6 +34,8 @@ if existing:
         existing["facebook_id"] = a.facebook
     if a.instagram:
         existing["instagram_id"] = a.instagram
+    if a.tiktok:
+        existing["tiktok_id"] = a.tiktok
     print("Updated", meta["kind"], meta["words"])
 else:
     entry = {"kind": meta["kind"], "youtube_id": a.youtube, "facebook_id": a.facebook, "instagram_id": a.instagram,
@@ -46,6 +49,8 @@ else:
         entry["style"] = meta["style"]
     if meta.get("story"):
         entry["story"] = meta["story"]
+    if a.tiktok:
+        entry["tiktok_id"] = a.tiktok
     data["published"].append(entry)
     print("Recorded", meta["kind"], meta["words"])
 json.dump(data, open(p, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
