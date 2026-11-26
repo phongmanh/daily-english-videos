@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily English – TikTok captions</title>
+<style>
+  body { margin: 0; background: #f4ecde; color: #22202c; font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 20px; }
+  .tag { display: inline-block; background: #22202c; color: #fffcf5; font-weight: 700; padding: 6px 16px; border-radius: 999px; font-size: 14px; letter-spacing: .04em; }
+  h1 { font-family: Georgia, serif; font-size: 34px; margin: 16px 0 8px; }
+  .card { background: #fffcf5; border: 3px solid #22202c; border-radius: 18px; box-shadow: 6px 6px 0 #22202c; padding: 18px 20px; margin: 22px 0; }
+  .muted { color: #605c6c; font-size: 14px; }
+  pre { white-space: pre-wrap; font: 15px/1.5 system-ui, sans-serif; margin: 10px 0; }
+  button { font: 700 16px system-ui, sans-serif; background: #ba4e2e; color: #fffcf5; border: 3px solid #22202c; border-radius: 12px; padding: 10px 18px; box-shadow: 3px 3px 0 #22202c; }
+  code { font-size: 22px; word-break: break-all; }
+  a { color: #ba4e2e; }
+</style>
+</head><body><main>
+<span class="tag">DAILY ENGLISH</span>
+<h1>TikTok captions</h1>
+<p class="muted">New videos arrive as drafts in your TikTok inbox. Open the draft, tap <b>Copy</b> here, paste the caption, then post.</p>
+<div id="list">Loading…</div>
+</main>
+<script>
+const when = s => { try { return new Date(s).toLocaleString("en-GB", {timeZone: "Asia/Ho_Chi_Minh", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}); } catch (e) { return s; } };
+fetch("tiktok.json?" + Date.now()).then(r => r.ok ? r.json() : []).catch(() => []).then(items => {
+  const list = document.getElementById("list");
+  if (!items.length) { list.textContent = "No videos yet."; return; }
+  list.textContent = "";
+  items.forEach(it => {
+    const c = document.createElement("div"); c.className = "card";
+    const h = document.createElement("div"); h.className = "muted";
+    h.textContent = (it.publish_at ? "Post at " + when(it.publish_at) : when(it.made)) + " · " + it.kind + (it.style ? " (" + it.style + ")" : "") + " · " + it.words.join(", ");
+    const p = document.createElement("pre"); p.textContent = it.caption;
+    const b = document.createElement("button"); b.textContent = "Copy caption";
+    b.onclick = () => navigator.clipboard.writeText(it.caption).then(() => { b.textContent = "Copied ✓"; setTimeout(() => b.textContent = "Copy caption", 1500); });
+    c.append(h, p, b); list.append(c);
+  });
+});
+</script>
+</body></html>
