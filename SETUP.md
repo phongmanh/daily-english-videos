@@ -14,7 +14,6 @@ GitHub → this repo → **Settings → Secrets and variables → Actions → Ne
 | `FB_PAGE_TOKEN` | A long-lived **Page** access token |
 | `TT_CLIENT_KEY`, `TT_CLIENT_SECRET` | TikTok app keys (optional, section 2c) |
 | `TT_REFRESH_TOKEN`, `TT_TOKEN_KEY` | From `scripts/get_tiktok_token.py` (optional, section 2c) |
-| `ANTHROPIC_API_KEY` | Claude API key, so new words are added automatically when the queue runs low (optional, section 2d) |
 
 ---
 
@@ -99,25 +98,6 @@ you open it, paste the caption and tap **Post** (about 30 seconds).
 (or whenever you like). Captions with a **Copy** button: <https://phongmanh.github.io/daily-english-videos/tiktok.html>.
 TikTok allows at most **5 waiting drafts** in 24 hours: if you don't post or delete them, new ones are skipped.
 
-## 2d. New words automatically (optional, Claude API)
-
-When fewer than 2 words in `words/queue.json` are still unposted, the 18:00 run asks Claude for
-5 new words before it makes the video: `words/<word>.json` + an animated drawing `engine/art/auto_<word>.py`,
-added to the queue and committed to the repo ("Add new words: …").
-
-1. <https://console.anthropic.com> → **API keys** → create a key. Add some credit under **Billing**
-   (one batch of 5 words is roughly 100k tokens, about once a week).
-2. Add it as the secret `ANTHROPIC_API_KEY`.
-3. Optional: to choose the model, add a **variable** (Secrets and variables → Actions → *Variables*)
-   `CLAUDE_MODEL`, e.g. `claude-opus-5-5`. Default: `claude-sonnet-5-5`.
-4. Test: **Run workflow** with **add words** + **dry run** ticked. The new words are committed; picture
-   previews (`new_art_<word>.png`) are in the run's *Artifacts*.
-
-Checks: the word data must have every field; the phonemes come from Kokoro itself; the drawing code may only
-use math/random/numpy/PIL (no files, no network) and is test-rendered with time limits. If a drawing still
-fails, the word uses a backup picture in its own colors (`engine/art/fallback.py`). You can always edit or
-delete a new word before it's posted — just change the files in `words/`, `engine/art/` and `words/queue.json`.
-
 ## 3. Test
 
 GitHub → **Actions → Daily video → Run workflow**
@@ -137,5 +117,5 @@ GitHub → **Actions → Daily video → Run workflow**
 - GitHub emails you when a run fails. Open the run to see which step failed.
 - **Facebook token expired** → make a new one (step 2) and update `FB_PAGE_TOKEN`.
 - **YouTube `invalid_grant`** → run `get_youtube_token.py` again and update `YT_REFRESH_TOKEN`.
-- **Queue empty** → add words (see README), or set up section 2d so it happens by itself.
+- **Queue empty** → the scheduled Claude task adds words every 2 days when it's low; or add them by hand (see `words/README.md`).
 - **To cancel a video before it goes public**: YouTube Studio → set it to private; Facebook → Meta Business Suite → Scheduled → delete.

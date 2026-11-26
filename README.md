@@ -48,8 +48,8 @@ GitHub Actions (daily, 11:47 and 17:47 VN)  .github/workflows/publish-instagram.
 | `words/<word>.json` | All content for one word (meaning, example, phonemes, colors) |
 | `words/queue.json` | Posting order |
 | `state/published.json` | What has been posted (don't edit by hand unless re-posting) |
-| `engine/art/` | One illustration class per word (`WORD = "..."`, `frame(t)` → 1600×1600 image); `auto_<word>.py` = made by Claude, `fallback.py` = backup picture |
-| `scripts/auto_words.py` | Adds 5 new words with the Claude API when the queue runs low |
+| `engine/art/` | One illustration class per word (`WORD = "..."`, `frame(t)` → 1600×1600 image); `fallback.py` = backup picture for a word without one |
+| `scripts/check_words.py` | Is the queue low? (`--status`) / check new words before they're queued (`--check`) |
 | `engine/short.py` | Word Short |
 | `engine/quiz.py` | Quiz Short (A/B/C) |
 | `engine/recall.py` | "Do you remember?" review Short |
@@ -62,8 +62,9 @@ GitHub Actions (daily, 11:47 and 17:47 VN)  .github/workflows/publish-instagram.
 
 ## Add new words
 
-**Automatic:** with the `ANTHROPIC_API_KEY` secret set (SETUP.md, section 2d), `scripts/auto_words.py` adds
-5 new words (data + drawing) whenever fewer than 2 are left in the queue. By hand:
+**Automatic:** the scheduled Claude task "Daily English – add new words" runs every 2 days. When fewer than 2 queue words
+are left, it writes 5 new ones following [`words/README.md`](words/README.md), checks them with
+`scripts/check_words.py`, and pushes them. By hand, the same guide applies:
 
 1. Add `words/<word>.json` (copy `words/stroll.json`; `ph`/`syl` are Kokoro phonemes, e.g. `kˈoʊzi`; `note`/`tip`/`vn_tip` are shown on screen, `note_say`/`tip_say`/`vn_tip_say`/`mean_say`/`ex_say` are read aloud; `vn_tip` is the "Người Việt hay nhầm" tip for Vietnamese speakers).
 2. Add an illustration class with `WORD = "<word>"` in `engine/art/` (any file in that folder is loaded).
