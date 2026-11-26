@@ -117,5 +117,5 @@ GitHub → **Actions → Daily video → Run workflow**
 - GitHub emails you when a run fails. Open the run to see which step failed.
 - **Facebook token expired** → make a new one (step 2) and update `FB_PAGE_TOKEN`.
 - **YouTube `invalid_grant`** → run `get_youtube_token.py` again and update `YT_REFRESH_TOKEN`.
-- **Queue empty** → add words (see README).
+- **Queue empty** → the scheduled Claude task adds words every 2 days when it's low; or add them by hand (see `words/README.md`).
 - **To cancel a video before it goes public**: YouTube Studio → set it to private; Facebook → Meta Business Suite → Scheduled → delete.
