@@ -18,7 +18,10 @@ def get_art(word):
     if _registry is None:
         _load()
     if word not in _registry:
-        raise KeyError(f"No illustration for '{word}'. Add a class with WORD = '{word}' in engine/art/.")
+        # No scene of its own (e.g. an auto-generated drawing failed its checks): use the backup scene.
+        print(f"Note: no illustration for '{word}', using the backup scene (engine/art/fallback.py).")
+        from engine.art.fallback import GenericScene
+        return GenericScene(word)
     return _registry[word]()
 
 def available():
