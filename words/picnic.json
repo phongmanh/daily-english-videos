@@ -1,0 +1,50 @@
+{
+ "word": "picnic",
+ "ipa": "/ˈpɪknɪk/",
+ "pos": "noun",
+ "vi": "buổi dã ngoại, chuyến picnic",
+ "meaning": "A meal you eat outside, often in a park.",
+ "mean_say": "a meal you eat outside, often in a park.",
+ "example": "We had a picnic under a big tree.",
+ "ex_say": "We had a picnic under a big tree.",
+ "forms": [
+  "picnic"
+ ],
+ "ph": "pˈɪknɪk",
+ "syl": [
+  "pˈɪk",
+  "nɪk"
+ ],
+ "chips": [
+  "pic",
+  "nic"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "PIK",
+   true
+  ],
+  [
+   "-nik",
+   false
+  ]
+ ],
+ "note": "Stress on the 1st syllable. Both parts end in a \"k\" sound.",
+ "note_say": "The stress is on the first syllable. Both parts end with a k sound.",
+ "tip": "We say \"have a picnic\" or \"go on a picnic\".",
+ "tip_say": "We say have a picnic, or go on a picnic.",
+ "vn_tip": "Bật rõ âm /k/ cuối: “PIK-nik”, đừng nuốt mất âm /k/.",
+ "vn_tip_say": "Say the K at the end clearly: pic, nic. Don't swallow it.",
+ "bg": [
+  246,
+  226,
+  196
+ ],
+ "accent": [
+  190,
+  70,
+  60
+ ],
+ "scene": "A red checked blanket with a basket, fruit and lemonade under a leafy tree, as a butterfly flutters and leaves sway."
+}

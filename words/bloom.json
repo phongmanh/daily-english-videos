@@ -1,0 +1,46 @@
+{
+ "word": "bloom",
+ "ipa": "/bluːm/",
+ "pos": "verb",
+ "vi": "nở hoa, nở rộ",
+ "meaning": "When a flower opens and shows its colors.",
+ "mean_say": "when a flower opens and shows its colors.",
+ "example": "The roses bloom in early spring.",
+ "ex_say": "The roses bloom in early spring.",
+ "forms": [
+  "bloom",
+  "blooms",
+  "bloomed"
+ ],
+ "ph": "blˈuːm",
+ "syl": [
+  "blˈuːm"
+ ],
+ "chips": [
+  "bloom"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "BLOOM",
+   true
+  ]
+ ],
+ "note": "One syllable. A long \"oo\", like in \"room\".",
+ "note_say": "It's just one syllable, with a long oo sound, like in room.",
+ "tip": "It's also a noun: \"in full bloom\" means all the flowers are open.",
+ "tip_say": "It's also a noun. In full bloom means all the flowers are open.",
+ "vn_tip": "Đọc rõ cụm /bl/ ở đầu: “blum”, đừng thành “bơ-lum”.",
+ "vn_tip_say": "Say the B and L together at the start: bloom, not buh-loom.",
+ "bg": [
+  248,
+  214,
+  222
+ ],
+ "accent": [
+  180,
+  60,
+  100
+ ],
+ "scene": "A pink flower in a pot slowly opens its petals in the sunshine while bees and petals drift by."
+}

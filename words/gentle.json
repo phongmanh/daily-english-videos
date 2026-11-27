@@ -1,0 +1,50 @@
+{
+ "word": "gentle",
+ "ipa": "/ˈdʒɛntəl/",
+ "pos": "adjective",
+ "vi": "nhẹ nhàng, dịu dàng, hiền lành",
+ "meaning": "Kind, calm and soft, not rough or strong.",
+ "mean_say": "kind, calm and soft, not rough or strong.",
+ "example": "A gentle wind moved the curtains.",
+ "ex_say": "A gentle wind moved the curtains.",
+ "forms": [
+  "gentle"
+ ],
+ "ph": "dʒˈɛntəl",
+ "syl": [
+  "dʒˈɛn",
+  "təl"
+ ],
+ "chips": [
+  "gen",
+  "tle"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "JEN",
+   true
+  ],
+  [
+   "-tl",
+   false
+  ]
+ ],
+ "note": "Stress on the 1st syllable. \"G\" sounds like \"j\" in \"jam\".",
+ "note_say": "The stress is on the first syllable. The g sounds like j, like in jam.",
+ "tip": "Use it for people, voices and weather: \"a gentle voice\", \"gentle rain\".",
+ "tip_say": "Use it for people, voices and weather. A gentle voice. Gentle rain.",
+ "vn_tip": "Âm đầu là /dʒ/ (giống “j” trong “jam”), không phải “g” như “ghế”.",
+ "vn_tip_say": "The first sound is J, like in jam. It is not a hard G.",
+ "bg": [
+  214,
+  232,
+  226
+ ],
+ "accent": [
+  46,
+  120,
+  104
+ ],
+ "scene": "White curtains sway softly at an open window, with a calm green garden and a floating feather outside."
+}

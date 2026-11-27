@@ -1,0 +1,51 @@
+{
+ "word": "wander",
+ "ipa": "/ˈwɑndər/",
+ "pos": "verb",
+ "vi": "đi lang thang, dạo quanh",
+ "meaning": "To walk around slowly, with no special place to go.",
+ "mean_say": "to walk around slowly, with no special place to go.",
+ "example": "We wandered around the old town all afternoon.",
+ "ex_say": "We wandered around the old town all afternoon.",
+ "forms": [
+  "wandered",
+  "wander"
+ ],
+ "ph": "wˈɔndɚ",
+ "syl": [
+  "wˈɔn",
+  "dɚ"
+ ],
+ "chips": [
+  "wan",
+  "der"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "WON",
+   true
+  ],
+  [
+   "-der",
+   false
+  ]
+ ],
+ "note": "Stress on the 1st syllable. \"wan\" sounds like \"wahn\".",
+ "note_say": "The stress is on the first syllable. The a sounds like ah, so it's wahn-der, not wonder.",
+ "tip": "Your mind can wander too: you stop paying attention.",
+ "tip_say": "Your mind can wander too. It means you stop paying attention.",
+ "vn_tip": "“wander” (/ɑ/, miệng mở rộng) khác “wonder” (/ʌ/): đừng nhầm hai từ.",
+ "vn_tip_say": "Wander has an open ah sound. Wonder has a short uh sound. Don't mix them up.",
+ "bg": [
+  232,
+  222,
+  244
+ ],
+ "accent": [
+  110,
+  80,
+  160
+ ],
+ "scene": "Little houses on a winding old-town lane at golden hour, with a walker slowly passing, lanterns glowing and birds drifting."
+}

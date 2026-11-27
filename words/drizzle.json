@@ -1,0 +1,50 @@
+{
+ "word": "drizzle",
+ "ipa": "/ˈdrɪzəl/",
+ "pos": "noun",
+ "vi": "mưa phùn, mưa lất phất",
+ "meaning": "Light rain with very small drops.",
+ "mean_say": "light rain with very small drops.",
+ "example": "We walked home in the soft drizzle.",
+ "ex_say": "We walked home in the soft drizzle.",
+ "forms": [
+  "drizzle"
+ ],
+ "ph": "dɹˈɪzəl",
+ "syl": [
+  "dɹˈɪ",
+  "zəl"
+ ],
+ "chips": [
+  "driz",
+  "zle"
+ ],
+ "stress": 0,
+ "like": [
+  [
+   "DRIZ",
+   true
+  ],
+  [
+   "-zl",
+   false
+  ]
+ ],
+ "note": "Stress on the 1st syllable. The \"zz\" is a buzzing \"z\".",
+ "note_say": "The stress is on the first syllable. The double z is a buzzing z sound.",
+ "tip": "It's also a verb: \"It's drizzling\" means light rain is falling.",
+ "tip_say": "It's also a verb. It's drizzling means light rain is falling.",
+ "vn_tip": "Âm /z/ phải rung, đừng đọc thành /s/: “DRIZ-zồ”, không phải “dri-sồ”.",
+ "vn_tip_say": "Make the Z buzz. Don't say it like an S.",
+ "bg": [
+  208,
+  222,
+  238
+ ],
+ "accent": [
+  50,
+  90,
+  150
+ ],
+ "scene": "A yellow umbrella over a quiet street on a grey day, with fine rain falling and little ripples in a puddle."
+}
